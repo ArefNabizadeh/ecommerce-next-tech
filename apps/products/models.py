@@ -292,3 +292,22 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.product.name}"
+
+
+class FlashSale(models.Model):
+    """مدل فروش ویژه"""
+
+    title = models.CharField(max_length=200, verbose_name="عنوان")
+    is_active = models.BooleanField(default=True, verbose_name="فعال")
+    hours = models.PositiveSmallIntegerField(default=12, verbose_name="ساعت")
+    minutes = models.PositiveSmallIntegerField(default=0, verbose_name="دقیقه")
+    seconds = models.PositiveSmallIntegerField(default=0, verbose_name="ثانیه")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "فروش ویژه"
+        verbose_name_plural = "فروش‌های ویژه"
+
+    def __str__(self):
+        return f"{self.title} - {self.hours:02d}:{self.minutes:02d}:{self.seconds:02d}"

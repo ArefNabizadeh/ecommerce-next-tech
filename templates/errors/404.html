@@ -6,183 +6,209 @@
 
 {% block content %}
 
-<!-- ===== صفحه ۴۰۴ ===== -->
-<section
-    class="relative min-h-[calc(100vh-80px)] w-full overflow-hidden flex items-center justify-center transition-colors duration-300"
-    style="min-height: calc(100vh - 80px);"
->
-    <!-- ===== پس‌زمینه ===== -->
-    <div class="absolute inset-0 -z-10">
-        <div
-            class="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-500"
-        ></div>
-        <div class="absolute top-[-20%] right-[-10%] size-[600px] rounded-full bg-blue-400/10 blur-3xl animate-float"></div>
-        <div class="absolute bottom-[-30%] left-[-10%] size-[500px] rounded-full bg-indigo-400/10 blur-3xl animate-float-delay"></div>
-        <div class="absolute top-[40%] left-[50%] size-[300px] rounded-full bg-cyan-400/5 blur-3xl animate-float-slow"></div>
-        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px]"></div>
-    </div>
+    <!-- ===== صفحه ۴۰۴ ===== -->
+    <section
+            class="relative min-h-[calc(100vh-80px)] w-full overflow-hidden flex items-center justify-center transition-colors duration-300"
+            style="min-height: calc(100vh - 80px);"
+    >
+        <!-- ===== پس‌زمینه ===== -->
+        <div class="absolute inset-0 -z-10">
+            <div
+                    class="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-500"
+            ></div>
+            <div class="absolute top-[-20%] right-[-10%] size-[600px] rounded-full bg-blue-400/10 blur-3xl animate-float"></div>
+            <div class="absolute bottom-[-30%] left-[-10%] size-[500px] rounded-full bg-indigo-400/10 blur-3xl animate-float-delay"></div>
+            <div class="absolute top-[40%] left-[50%] size-[300px] rounded-full bg-cyan-400/5 blur-3xl animate-float-slow"></div>
+            <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+        </div>
 
-    <!-- ===== محتوای اصلی ===== -->
-    <div class="container max-w-7xl mx-auto px-4 sm:px-6 py-12">
-        <div class="flex flex-col items-center text-center" data-aos="fade-up">
+        <!-- ===== محتوای اصلی ===== -->
+        <div class="container max-w-7xl mx-auto px-4 sm:px-6 py-12">
+            <div class="flex flex-col items-center text-center" data-aos="fade-up">
 
-            <!-- ===== عدد ۴۰۴ ===== -->
-            <div class="relative" data-aos="fade-up" data-aos-delay="50">
-                <h1 class="text-8xl sm:text-9xl md:text-[10rem] lg:text-[12rem] font-bold tracking-tighter leading-none select-none">
+                <!-- ===== عدد ۴۰۴ ===== -->
+                <div class="relative" data-aos="fade-up" data-aos-delay="50">
+                    <h1 class="text-8xl sm:text-9xl md:text-[10rem] lg:text-[12rem] font-bold tracking-tighter leading-none select-none">
                     <span class="bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
                         ۴۰۴
                     </span>
-                </h1>
+                    </h1>
 
-                <!-- دایره‌های تزیینی -->
-                <div class="absolute -top-10 -right-10 size-24 rounded-full bg-blue-400/10 blur-2xl animate-float-slow"></div>
-                <div class="absolute -bottom-8 -left-8 size-32 rounded-full bg-indigo-400/10 blur-2xl animate-float-delay"></div>
-            </div>
+                    <!-- دایره‌های تزیینی -->
+                    <div class="absolute -top-10 -right-10 size-24 rounded-full bg-blue-400/10 blur-2xl animate-float-slow"></div>
+                    <div class="absolute -bottom-8 -left-8 size-32 rounded-full bg-indigo-400/10 blur-2xl animate-float-delay"></div>
+                </div>
 
-            <!-- ===== آیکون ===== -->
-            <div class="mt-4 rounded-full bg-blue-100 p-4 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400" data-aos="fade-up" data-aos-delay="100">
-                <i data-lucide="search" class="size-10"></i>
-            </div>
+                <!-- ===== آیکون ===== -->
+                <div class="mt-4 rounded-full bg-blue-100 p-4 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400"
+                     data-aos="fade-up" data-aos-delay="100">
+                    <i data-lucide="search" class="size-10"></i>
+                </div>
 
-            <!-- ===== پیام اصلی ===== -->
-            <h2 class="mt-6 text-2xl md:text-3xl font-bold transition-colors duration-300"
-                :class="$parent.darkMode ? 'text-white' : 'text-slate-800'"
-                data-aos="fade-up" data-aos-delay="150">
-                صفحه‌ای که به دنبال آن هستید پیدا نشد!
-            </h2>
+                <!-- ===== پیام اصلی ===== -->
+                <h2 class="mt-6 text-2xl md:text-3xl font-bold text-slate-800 dark:text-white"
+                    data-aos="fade-up" data-aos-delay="150">
+                    صفحه‌ای که به دنبال آن هستید پیدا نشد!
+                </h2>
 
-            <p class="mt-3 max-w-lg text-base md:text-lg transition-colors duration-300"
-               :class="$parent.darkMode ? 'text-slate-400' : 'text-slate-500'"
-               data-aos="fade-up" data-aos-delay="200">
-                ممکن است صفحه حذف شده باشد، نام آدرس تغییر کرده باشد یا موقتاً در دسترس نباشد.
-            </p>
-
-            <!-- ===== دکمه‌ها ===== -->
-            <div class="mt-8 flex flex-wrap items-center justify-center gap-3" data-aos="fade-up" data-aos-delay="250">
-                <a href="{% url 'core:home' %}"
-                   class="group inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40">
-                    <i data-lucide="home" class="size-4 group-hover:scale-110 transition-transform"></i>
-                    بازگشت به خانه
-                </a>
-                <a href="{% url 'products:product_list' %}"
-                   class="group inline-flex items-center gap-2 rounded-2xl border border-slate-300 px-6 py-3 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50"
-                   :class="$parent.darkMode ? 'border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white' : 'border-slate-200 text-slate-700 hover:bg-slate-50'">
-                    <i data-lucide="shopping-bag" class="size-4 group-hover:scale-110 transition-transform"></i>
-                    ادامه خرید
-                </a>
-            </div>
-
-            <!-- ===== جعبه جستجو ===== -->
-            <div class="mt-10 w-full max-w-md" data-aos="fade-up" data-aos-delay="300">
-                <form action="" method="GET" class="relative">
-                    <input
-                        type="text"
-                        name="q"
-                        placeholder="جستجوی محصولات..."
-                        class="w-full rounded-2xl border bg-white/50 px-4 py-3.5 pr-12 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                        :class="$parent.darkMode ? 'border-slate-700 bg-slate-900/50 text-white placeholder:text-slate-500' : 'border-slate-200 text-slate-800 placeholder:text-slate-400'"
-                    >
-                    <button type="submit" class="absolute inset-y-0 left-0 flex items-center pl-4 transition-colors"
-                            :class="$parent.darkMode ? 'text-slate-500 hover:text-white' : 'text-slate-400 hover:text-blue-600'">
-                        <i data-lucide="search" class="size-4"></i>
-                    </button>
-                </form>
-            </div>
-
-            <!-- ===== دسته‌بندی‌های محبوب ===== -->
-            <div class="mt-8 w-full max-w-2xl" data-aos="fade-up" data-aos-delay="350">
-                <p class="text-sm font-medium transition-colors duration-300"
-                   :class="$parent.darkMode ? 'text-slate-400' : 'text-slate-500'">
-                    دسته‌بندی‌های محبوب:
+                <p class="mt-3 max-w-lg text-base md:text-lg text-slate-500 dark:text-slate-400"
+                   data-aos="fade-up" data-aos-delay="200">
+                    ممکن است صفحه حذف شده باشد، نام آدرس تغییر کرده باشد یا موقتاً در
+                    دسترس نباشد.
                 </p>
-                <div class="mt-3 flex flex-wrap items-center justify-center gap-2">
-                    <a href="#" class="rounded-full border px-4 py-1.5 text-xs transition-all duration-200 hover:scale-105"
-                       :class="$parent.darkMode ? 'border-slate-700 text-slate-300 hover:border-blue-600 hover:text-white' : 'border-slate-200 text-slate-600 hover:border-blue-600 hover:text-blue-600'">
-                        گوشی موبایل
+
+                <!-- ===== دکمه‌ها ===== -->
+                <div class="mt-8 flex flex-wrap items-center justify-center gap-3"
+                     data-aos="fade-up" data-aos-delay="250">
+                    <a href="{% url 'apps.core:home' %}"
+                       class="group inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40">
+                        <i data-lucide="home"
+                           class="size-4 group-hover:scale-110 transition-transform"></i>
+                        بازگشت به خانه
                     </a>
-                    <a href="#" class="rounded-full border px-4 py-1.5 text-xs transition-all duration-200 hover:scale-105"
-                       :class="$parent.darkMode ? 'border-slate-700 text-slate-300 hover:border-blue-600 hover:text-white' : 'border-slate-200 text-slate-600 hover:border-blue-600 hover:text-blue-600'">
-                        لپ‌تاپ
-                    </a>
-                    <a href="#" class="rounded-full border px-4 py-1.5 text-xs transition-all duration-200 hover:scale-105"
-                       :class="$parent.darkMode ? 'border-slate-700 text-slate-300 hover:border-blue-600 hover:text-white' : 'border-slate-200 text-slate-600 hover:border-blue-600 hover:text-blue-600'">
-                        هدفون
-                    </a>
-                    <a href="#" class="rounded-full border px-4 py-1.5 text-xs transition-all duration-200 hover:scale-105"
-                       :class="$parent.darkMode ? 'border-slate-700 text-slate-300 hover:border-blue-600 hover:text-white' : 'border-slate-200 text-slate-600 hover:border-blue-600 hover:text-blue-600'">
-                        ساعت هوشمند
-                    </a>
-                    <a href="#" class="rounded-full border px-4 py-1.5 text-xs transition-all duration-200 hover:scale-105"
-                       :class="$parent.darkMode ? 'border-slate-700 text-slate-300 hover:border-blue-600 hover:text-white' : 'border-slate-200 text-slate-600 hover:border-blue-600 hover:text-blue-600'">
-                        تبلت
+                    <a href="{% url 'apps.products:product_list' %}"
+                       class="group inline-flex items-center gap-2 rounded-2xl border border-slate-300 px-6 py-3 text-sm font-medium text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white">
+                        <i data-lucide="shopping-bag"
+                           class="size-4 group-hover:scale-110 transition-transform"></i>
+                        ادامه خرید
                     </a>
                 </div>
-            </div>
 
-            <!-- ===== محصولات پرفروش (پیشنهادی) ===== -->
-            <div class="mt-12 w-full max-w-3xl" data-aos="fade-up" data-aos-delay="400">
-                <p class="text-sm font-medium transition-colors duration-300"
-                   :class="$parent.darkMode ? 'text-slate-400' : 'text-slate-500'">
-                    محصولات پرفروش:
-                </p>
-                <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                    <div class="rounded-2xl bg-white/50 p-3 text-center transition-all duration-200 hover:scale-105 hover:shadow-md dark:bg-slate-900/50">
-                        <div class="mx-auto size-12 rounded-xl bg-slate-200/50 dark:bg-slate-800/50"></div>
-                        <p class="mt-2 text-xs font-medium transition-colors duration-300"
-                           :class="$parent.darkMode ? 'text-slate-300' : 'text-slate-700'">سامسونگ S24</p>
-                        <p class="text-[10px] transition-colors duration-300"
-                           :class="$parent.darkMode ? 'text-slate-500' : 'text-slate-400'">۴۵,۰۰۰,۰۰۰ تومان</p>
-                    </div>
-                    <div class="rounded-2xl bg-white/50 p-3 text-center transition-all duration-200 hover:scale-105 hover:shadow-md dark:bg-slate-900/50">
-                        <div class="mx-auto size-12 rounded-xl bg-slate-200/50 dark:bg-slate-800/50"></div>
-                        <p class="mt-2 text-xs font-medium transition-colors duration-300"
-                           :class="$parent.darkMode ? 'text-slate-300' : 'text-slate-700'">ایسوس ROG</p>
-                        <p class="text-[10px] transition-colors duration-300"
-                           :class="$parent.darkMode ? 'text-slate-500' : 'text-slate-400'">۱۲۵,۰۰۰,۰۰۰ تومان</p>
-                    </div>
-                    <div class="rounded-2xl bg-white/50 p-3 text-center transition-all duration-200 hover:scale-105 hover:shadow-md dark:bg-slate-900/50">
-                        <div class="mx-auto size-12 rounded-xl bg-slate-200/50 dark:bg-slate-800/50"></div>
-                        <p class="mt-2 text-xs font-medium transition-colors duration-300"
-                           :class="$parent.darkMode ? 'text-slate-300' : 'text-slate-700'">سونی WH-1000</p>
-                        <p class="text-[10px] transition-colors duration-300"
-                           :class="$parent.darkMode ? 'text-slate-500' : 'text-slate-400'">۱۲,۵۰۰,۰۰۰ تومان</p>
-                    </div>
-                    <div class="rounded-2xl bg-white/50 p-3 text-center transition-all duration-200 hover:scale-105 hover:shadow-md dark:bg-slate-900/50">
-                        <div class="mx-auto size-12 rounded-xl bg-slate-200/50 dark:bg-slate-800/50"></div>
-                        <p class="mt-2 text-xs font-medium transition-colors duration-300"
-                           :class="$parent.darkMode ? 'text-slate-300' : 'text-slate-700'">اپل واچ</p>
-                        <p class="text-[10px] transition-colors duration-300"
-                           :class="$parent.darkMode ? 'text-slate-500' : 'text-slate-400'">۳۵,۰۰۰,۰۰۰ تومان</p>
-                    </div>
+                <!-- ===== جعبه جستجو ===== -->
+                <div class="mt-10 w-full max-w-md" data-aos="fade-up"
+                     data-aos-delay="300">
+                    <form action="{% url 'apps.products:product_list' %}" method="GET"
+                          class="relative">
+                        <input
+                                type="text"
+                                name="q"
+                                placeholder="جستجوی محصولات..."
+                                class="w-full rounded-2xl border bg-white/50 px-4 py-3.5 pr-12 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-slate-700 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
+                        >
+                        <button type="submit"
+                                class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 transition-colors hover:text-blue-600 dark:hover:text-white">
+                            <i data-lucide="search" class="size-4"></i>
+                        </button>
+                    </form>
                 </div>
-            </div>
 
+                <!-- ===== دسته‌بندی‌های محبوب (از دیتابیس) ===== -->
+                {% if popular_categories %}
+                    <div class="mt-8 w-full max-w-2xl" data-aos="fade-up"
+                         data-aos-delay="350">
+                        <p class="text-sm font-medium text-slate-500 dark:text-slate-400">
+                            دسته‌بندی‌های محبوب:
+                        </p>
+                        <div class="mt-3 flex flex-wrap items-center justify-center gap-2">
+                            {% for category in popular_categories|slice:":5" %}
+                                <a href="{% url 'apps.products:product_list' %}?category={{ category.slug }}"
+                                   class="rounded-full border px-4 py-1.5 text-xs transition-all duration-200 hover:scale-105 border-slate-200 text-slate-600 hover:border-blue-600 hover:text-blue-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-blue-600 dark:hover:text-white">
+                                    {{ category.name }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- ===== محصولات پرفروش (پیشنهادی) ===== -->
+                {% if best_sellers %}
+                    <div class="mt-12 w-full max-w-3xl" data-aos="fade-up"
+                         data-aos-delay="400">
+                        <p class="text-sm font-medium text-slate-500 dark:text-slate-400">
+                            محصولات پرفروش:
+                        </p>
+                        <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                            {% for product in best_sellers|slice:":4" %}
+                                <a href="{% url 'apps.products:product_detail' product.id %}"
+                                   class="group rounded-2xl bg-white/50 p-3 text-center transition-all duration-200 hover:scale-105 hover:shadow-md dark:bg-slate-900/50">
+                                    <div class="mx-auto size-12 rounded-xl bg-slate-200/50 overflow-hidden dark:bg-slate-800/50">
+                                        {% if product.image %}
+                                            <img src="{{ product.image.url }}"
+                                                 alt="{{ product.name }}"
+                                                 class="w-full h-full object-cover">
+                                        {% else %}
+                                            <div class="w-full h-full flex items-center justify-center text-2xl">
+                                                {% if product.category.name == 'موبایل' or product.category.name == 'گوشی' %}
+                                                    📱
+                                                {% elif product.category.name == 'لپ‌تاپ' %}
+                                                    💻
+                                                {% elif product.category.name == 'هدفون' %}
+                                                    🎧
+                                                {% elif product.category.name == 'ساعت هوشمند' %}
+                                                    ⌚
+                                                {% else %}📦{% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <p class="mt-2 text-xs font-medium text-slate-700 dark:text-slate-300 line-clamp-1">{{ product.name }}</p>
+                                    <p class="text-[10px] text-slate-400 dark:text-slate-500">{{ product.final_price|floatformat:0 }}
+                                        تومان</p>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<style>
-    @keyframes float {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        50% { transform: translate(30px, -20px) scale(1.05); }
-    }
-    @keyframes float-delay {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        50% { transform: translate(-30px, 20px) scale(1.05); }
-    }
-    @keyframes float-slow {
-        0%, 100% { transform: translate(0, 0); }
-        50% { transform: translate(20px, -30px); }
-    }
-    @keyframes gradient {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-    .animate-float { animation: float 8s ease-in-out infinite; }
-    .animate-float-delay { animation: float-delay 10s ease-in-out infinite; }
-    .animate-float-slow { animation: float-slow 12s ease-in-out infinite; }
-    .animate-gradient { animation: gradient 6s ease-in-out infinite; background-size: 200% 200%; }
-</style>
+    <style>
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            50% {
+                transform: translate(30px, -20px) scale(1.05);
+            }
+        }
+
+        @keyframes float-delay {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            50% {
+                transform: translate(-30px, 20px) scale(1.05);
+            }
+        }
+
+        @keyframes float-slow {
+            0%, 100% {
+                transform: translate(0, 0);
+            }
+            50% {
+                transform: translate(20px, -30px);
+            }
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .animate-float {
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .animate-float-delay {
+            animation: float-delay 10s ease-in-out infinite;
+        }
+
+        .animate-float-slow {
+            animation: float-slow 12s ease-in-out infinite;
+        }
+
+        .animate-gradient {
+            animation: gradient 6s ease-in-out infinite;
+            background-size: 200% 200%;
+        }
+    </style>
 
 {% endblock %}

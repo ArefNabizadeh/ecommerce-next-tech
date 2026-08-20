@@ -18,9 +18,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-
+from apps.core.views import error_404_preview, error_500_preview, error_404_view, error_500_view
 from apps.core.views import clear_messages
 
+
+handler404 = 'apps.core.views.error_404_view'
+handler500 = 'apps.core.views.error_500_view'
 urlpatterns = [
     path("admin/", admin.site.urls),
 
@@ -41,4 +44,9 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
+    urlpatterns += [
+        path('404/', error_404_preview, name='error_404_preview'),
+        path('500/', error_500_preview, name='error_500_preview'),
+    ]
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
