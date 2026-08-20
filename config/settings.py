@@ -13,6 +13,7 @@ import sys
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 load_dotenv()
 
@@ -27,9 +28,11 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 if not SECRET_KEY:
     raise ValueError("DJANGO_SECRET_KEY is not set.")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [  "ArefNabizadeh.pythonanywhere.com",]
+
+
 
 # Application definition
 
@@ -77,6 +80,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'apps.core.context_processors.user_context',
                 'apps.dashboard.context_processors.dashboard_counts',
+                'apps.core.context_processors.navbar_data'
             ],
         },
     },

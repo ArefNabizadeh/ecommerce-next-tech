@@ -6,262 +6,272 @@
 
 {% block dashboard_content %}
 
-<!-- ===== بخش خوش‌آمدگویی ===== -->
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" data-aos="fade-up">
-    <div>
-        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">
-            👋 خوش آمدید، {{ user.get_full_name|default:user.username }}
-        </h1>
-        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            امروز چه کمکی می‌توانم به شما کنم؟
-        </p>
-    </div>
-    <div class="flex items-center gap-3">
-        <div class="rounded-2xl bg-amber-100 px-4 py-2 text-sm font-medium text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
-            <i data-lucide="star" class="inline-block size-3.5 ml-1"></i>
-            {{ reward_points|default:0 }} امتیاز
-        </div>
-        <div class="rounded-2xl bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
-            <i data-lucide="wallet" class="inline-block size-3.5 ml-1"></i>
-            {{ wallet_balance|default:"۰" }} تومان
-        </div>
-    </div>
-</div>
-
-<!-- ===== آمار سریع ===== -->
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" data-aos="fade-up" data-aos-delay="50">
-
-    <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-200 hover:shadow-2xl hover:-translate-y-0.5 dark:bg-slate-900/80 dark:border-slate-800/50 dark:hover:shadow-2xl">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-2xl font-bold text-slate-800 dark:text-white">{{ total_orders|default:0 }}</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">کل سفارشات</p>
-            </div>
-            <div class="rounded-full bg-blue-100 p-2.5 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400">
-                <i data-lucide="package" class="size-5"></i>
-            </div>
-        </div>
-    </div>
-
-    <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-200 hover:shadow-2xl hover:-translate-y-0.5 dark:bg-slate-900/80 dark:border-slate-800/50 dark:hover:shadow-2xl">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ pending_orders|default:0 }}</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">در انتظار</p>
-            </div>
-            <div class="rounded-full bg-amber-100 p-2.5 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400">
-                <i data-lucide="clock" class="size-5"></i>
-            </div>
-        </div>
-    </div>
-
-    <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-200 hover:shadow-2xl hover:-translate-y-0.5 dark:bg-slate-900/80 dark:border-slate-800/50 dark:hover:shadow-2xl">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ completed_orders|default:0 }}</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">تکمیل شده</p>
-            </div>
-            <div class="rounded-full bg-emerald-100 p-2.5 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
-                <i data-lucide="check-circle" class="size-5"></i>
-            </div>
-        </div>
-    </div>
-
-    <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-200 hover:shadow-2xl hover:-translate-y-0.5 dark:bg-slate-900/80 dark:border-slate-800/50 dark:hover:shadow-2xl">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-2xl font-bold text-rose-600 dark:text-rose-400">{{ wishlist_count|default:0 }}</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">علاقه‌مندی‌ها</p>
-            </div>
-            <div class="rounded-full bg-rose-100 p-2.5 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400">
-                <i data-lucide="heart" class="size-5"></i>
-            </div>
-        </div>
-    </div>
-
-    <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-200 hover:shadow-2xl hover:-translate-y-0.5 dark:bg-slate-900/80 dark:border-slate-800/50 dark:hover:shadow-2xl">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ addresses_count|default:0 }}</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">آدرس‌ها</p>
-            </div>
-            <div class="rounded-full bg-indigo-100 p-2.5 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400">
-                <i data-lucide="map-pin" class="size-5"></i>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<!-- ===== اقدامات سریع ===== -->
-<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" data-aos="fade-up" data-aos-delay="100">
-    <a href="{% url 'apps.dashboard:orders' %}" class="group flex items-center gap-3
-    rounded-2xl border border-slate-200/50 bg-white/50 p-3 transition-all duration-200 hover:border-blue-600 hover:bg-blue-50 hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-800/50 dark:hover:border-blue-600/50 dark:hover:bg-blue-950/30">
-        <div class="rounded-full bg-blue-100 p-2 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-600 dark:group-hover:text-white transition-colors">
-            <i data-lucide="package" class="size-4"></i>
-        </div>
-        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">سفارشات</span>
-    </a>
-
-    <a href="{% url 'apps.dashboard:profile' %}" class="group flex items-center gap-3
-    rounded-2xl border border-slate-200/50 bg-white/50 p-3 transition-all duration-200 hover:border-blue-600 hover:bg-blue-50 hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-800/50 dark:hover:border-blue-600/50 dark:hover:bg-blue-950/30">
-        <div class="rounded-full bg-emerald-100 p-2 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white dark:group-hover:bg-emerald-600 dark:group-hover:text-white transition-colors">
-            <i data-lucide="user" class="size-4"></i>
-        </div>
-        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">پروفایل</span>
-    </a>
-
-    <a href="{% url 'apps.dashboard:wishlist' %}" class="group flex items-center gap-3
-    rounded-2xl border border-slate-200/50 bg-white/50 p-3 transition-all duration-200 hover:border-rose-600 hover:bg-rose-50 hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-800/50 dark:hover:border-rose-600/50 dark:hover:bg-rose-950/30">
-        <div class="rounded-full bg-rose-100 p-2 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400 group-hover:bg-rose-600 group-hover:text-white dark:group-hover:bg-rose-600 dark:group-hover:text-white transition-colors">
-            <i data-lucide="heart" class="size-4"></i>
-        </div>
-        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">علاقه‌مندی‌ها</span>
-    </a>
-
-    <a href="{% url 'apps.dashboard:addresses' %}" class="group flex items-center gap-3
-    rounded-2xl border border-slate-200/50 bg-white/50 p-3 transition-all duration-200 hover:border-indigo-600 hover:bg-indigo-50 hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-800/50 dark:hover:border-indigo-600/50 dark:hover:bg-indigo-950/30">
-        <div class="rounded-full bg-indigo-100 p-2 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white dark:group-hover:bg-indigo-600 dark:group-hover:text-white transition-colors">
-            <i data-lucide="map-pin" class="size-4"></i>
-        </div>
-        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">آدرس‌ها</span>
-    </a>
-
-    <a href="#" class="group flex items-center gap-3 rounded-2xl border border-slate-200/50 bg-white/50 p-3 transition-all duration-200 hover:border-amber-600 hover:bg-amber-50 hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-800/50 dark:hover:border-amber-600/50 dark:hover:bg-amber-950/30">
-        <div class="rounded-full bg-amber-100 p-2 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 group-hover:bg-amber-600 group-hover:text-white dark:group-hover:bg-amber-600 dark:group-hover:text-white transition-colors">
-            <i data-lucide="headphones" class="size-4"></i>
-        </div>
-        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">پشتیبانی</span>
-    </a>
-</div>
-
-<!-- ===== بنر تبلیغاتی ===== -->
-<div class="relative overflow-hidden rounded-3xl bg-gradient-to-l from-blue-600 to-indigo-700 p-6 md:p-8 text-white shadow-xl" data-aos="fade-up" data-aos-delay="150">
-    <div class="absolute inset-0 opacity-10">
-        <div class="absolute -top-20 -right-20 size-64 rounded-full bg-white/10 blur-3xl"></div>
-        <div class="absolute -bottom-20 -left-20 size-64 rounded-full bg-white/10 blur-3xl"></div>
-    </div>
-    <div class="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <!-- ===== بخش خوش‌آمدگویی ===== -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+         data-aos="fade-up">
         <div>
-            <p class="text-sm font-medium text-blue-200">🎁 پیشنهاد ویژه</p>
-            <h3 class="text-2xl font-bold">تا ۳۰٪ تخفیف برای خرید اول</h3>
-            <p class="mt-1 text-sm text-blue-100">با کد تخفیف <span class="font-mono font-bold">WELCOME30</span> در اولین خرید خود استفاده کنید.</p>
+            <h1 class="text-2xl font-bold text-slate-800 dark:text-white">
+                👋 خوش آمدید، {{ user.get_full_name|default:user.username }}
+            </h1>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                امروز چه کمکی می‌توانم به شما کنم؟
+            </p>
         </div>
-        <a href="#" class="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-blue-600 transition-all duration-200 hover:bg-blue-50 hover:-translate-y-0.5 shadow-lg shadow-white/20">
-            شروع خرید
-            <i data-lucide="arrow-left" class="size-4"></i>
+        <div class="flex items-center gap-3">
+            <div class="rounded-2xl bg-amber-100 px-4 py-2 text-sm font-medium text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
+                <i data-lucide="star" class="inline-block size-3.5 ml-1"></i>
+                {{ reward_points|default:0 }} امتیاز
+            </div>
+            <div class="rounded-2xl bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+                <i data-lucide="wallet" class="inline-block size-3.5 ml-1"></i>
+                {{ wallet_balance|default:"۰" }} تومان
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== آمار سریع ===== -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" data-aos="fade-up"
+         data-aos-delay="50">
+
+        <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-200 hover:shadow-2xl hover:-translate-y-0.5 dark:bg-slate-900/80 dark:border-slate-800/50 dark:hover:shadow-2xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-2xl font-bold text-slate-800 dark:text-white">{{ total_orders|default:0 }}</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">کل سفارشات</p>
+                </div>
+                <div class="rounded-full bg-blue-100 p-2.5 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400">
+                    <i data-lucide="package" class="size-5"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-200 hover:shadow-2xl hover:-translate-y-0.5 dark:bg-slate-900/80 dark:border-slate-800/50 dark:hover:shadow-2xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ pending_orders|default:0 }}</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">در انتظار</p>
+                </div>
+                <div class="rounded-full bg-amber-100 p-2.5 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400">
+                    <i data-lucide="clock" class="size-5"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-200 hover:shadow-2xl hover:-translate-y-0.5 dark:bg-slate-900/80 dark:border-slate-800/50 dark:hover:shadow-2xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ delivered_orders|default:0 }}</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">تحویل شده</p>
+                </div>
+                <div class="rounded-full bg-emerald-100 p-2.5 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
+                    <i data-lucide="check-circle" class="size-5"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-200 hover:shadow-2xl hover:-translate-y-0.5 dark:bg-slate-900/80 dark:border-slate-800/50 dark:hover:shadow-2xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-2xl font-bold text-rose-600 dark:text-rose-400">{{ wishlist_count|default:0 }}</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        علاقه‌مندی‌ها</p>
+                </div>
+                <div class="rounded-full bg-rose-100 p-2.5 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400">
+                    <i data-lucide="heart" class="size-5"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-200 hover:shadow-2xl hover:-translate-y-0.5 dark:bg-slate-900/80 dark:border-slate-800/50 dark:hover:shadow-2xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ addresses_count|default:0 }}</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">آدرس‌ها</p>
+                </div>
+                <div class="rounded-full bg-indigo-100 p-2.5 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400">
+                    <i data-lucide="map-pin" class="size-5"></i>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== اقدامات سریع ===== -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" data-aos="fade-up"
+         data-aos-delay="100">
+        <a href="{% url 'apps.dashboard:orders' %}" class="group flex items-center gap-3
+    rounded-2xl border border-slate-200/50 bg-white/50 p-3 transition-all duration-200 hover:border-blue-600 hover:bg-blue-50 hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-800/50 dark:hover:border-blue-600/50 dark:hover:bg-blue-950/30">
+            <div class="rounded-full bg-blue-100 p-2 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-600 dark:group-hover:text-white transition-colors">
+                <i data-lucide="package" class="size-4"></i>
+            </div>
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">سفارشات</span>
+        </a>
+
+        <a href="{% url 'apps.dashboard:profile' %}" class="group flex items-center gap-3
+    rounded-2xl border border-slate-200/50 bg-white/50 p-3 transition-all duration-200 hover:border-blue-600 hover:bg-blue-50 hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-800/50 dark:hover:border-blue-600/50 dark:hover:bg-blue-950/30">
+            <div class="rounded-full bg-emerald-100 p-2 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white dark:group-hover:bg-emerald-600 dark:group-hover:text-white transition-colors">
+                <i data-lucide="user" class="size-4"></i>
+            </div>
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">پروفایل</span>
+        </a>
+
+        <a href="{% url 'apps.dashboard:wishlist' %}" class="group flex items-center gap-3
+    rounded-2xl border border-slate-200/50 bg-white/50 p-3 transition-all duration-200 hover:border-rose-600 hover:bg-rose-50 hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-800/50 dark:hover:border-rose-600/50 dark:hover:bg-rose-950/30">
+            <div class="rounded-full bg-rose-100 p-2 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400 group-hover:bg-rose-600 group-hover:text-white dark:group-hover:bg-rose-600 dark:group-hover:text-white transition-colors">
+                <i data-lucide="heart" class="size-4"></i>
+            </div>
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">علاقه‌مندی‌ها</span>
+        </a>
+
+        <a href="{% url 'apps.dashboard:addresses' %}" class="group flex items-center gap-3
+    rounded-2xl border border-slate-200/50 bg-white/50 p-3 transition-all duration-200 hover:border-indigo-600 hover:bg-indigo-50 hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-800/50 dark:hover:border-indigo-600/50 dark:hover:bg-indigo-950/30">
+            <div class="rounded-full bg-indigo-100 p-2 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white dark:group-hover:bg-indigo-600 dark:group-hover:text-white transition-colors">
+                <i data-lucide="map-pin" class="size-4"></i>
+            </div>
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">آدرس‌ها</span>
+        </a>
+
+        <a href="#"
+           class="group flex items-center gap-3 rounded-2xl border border-slate-200/50 bg-white/50 p-3 transition-all duration-200 hover:border-amber-600 hover:bg-amber-50 hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-800/50 dark:hover:border-amber-600/50 dark:hover:bg-amber-950/30">
+            <div class="rounded-full bg-amber-100 p-2 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 group-hover:bg-amber-600 group-hover:text-white dark:group-hover:bg-amber-600 dark:group-hover:text-white transition-colors">
+                <i data-lucide="headphones" class="size-4"></i>
+            </div>
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">پشتیبانی</span>
         </a>
     </div>
-</div>
 
-<!-- ===== بخش پایین: سفارشات اخیر و فعالیت‌ها ===== -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6" data-aos="fade-up" data-aos-delay="200">
-
-    <!-- ===== سفارشات اخیر ===== -->
-    <div class="lg:col-span-2 rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-slate-800 dark:text-white">سفارشات اخیر</h3>
-            <a href="{% url 'apps.dashboard:orders' %}" class="text-sm text-blue-600
-            hover:underline dark:text-blue-400">مشاهده همه</a>
+    <!-- ===== بنر تبلیغاتی ===== -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-l from-blue-600 to-indigo-700 p-6 md:p-8 text-white shadow-xl"
+         data-aos="fade-up" data-aos-delay="150">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute -top-20 -right-20 size-64 rounded-full bg-white/10 blur-3xl"></div>
+            <div class="absolute -bottom-20 -left-20 size-64 rounded-full bg-white/10 blur-3xl"></div>
         </div>
+        <div class="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <p class="text-sm font-medium text-blue-200">🎁 پیشنهاد ویژه</p>
+                <h3 class="text-2xl font-bold">تا ۳۰٪ تخفیف برای خرید اول</h3>
+                <p class="mt-1 text-sm text-blue-100">با کد تخفیف <span
+                        class="font-mono font-bold">WELCOME30</span> در اولین خرید خود
+                    استفاده کنید.</p>
+            </div>
+            <a href="{% url 'apps.products:product_list' %}"
+               class="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-blue-600 transition-all duration-200 hover:bg-blue-50 hover:-translate-y-0.5 shadow-lg shadow-white/20">
+                شروع خرید
+                <i data-lucide="arrow-left" class="size-4"></i>
+            </a>
+        </div>
+    </div>
 
-        {% if recent_orders %}
-            <div class="divide-y divide-slate-200/50 dark:divide-slate-700/50">
-                {% for order in recent_orders %}
-                    <div class="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2">
+    <!-- ===== بخش پایین: سفارشات اخیر و فعالیت‌ها ===== -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" data-aos="fade-up"
+         data-aos-delay="200">
+
+        <!-- ===== سفارشات اخیر ===== -->
+        <div class="lg:col-span-2 rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">سفارشات
+                    اخیر</h3>
+                <a href="{% url 'apps.dashboard:orders' %}" class="text-sm text-blue-600
+            hover:underline dark:text-blue-400">مشاهده همه</a>
+            </div>
+
+            {% if recent_orders %}
+                <div class="divide-y divide-slate-200/50 dark:divide-slate-700/50">
+                    {% for order in recent_orders %}
+                        <div class="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2">
                                 <span class="text-sm font-medium text-slate-800 dark:text-white truncate">
                                     سفارش #{{ order.order_number }}
                                 </span>
-                                <span class="rounded-full px-2 py-0.5 text-[10px] font-medium"
-                                    :class="{
-                                        'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400': order.status == 'pending',
-                                        'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400': order.status == 'delivered',
-                                        'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400': order.status == 'processing',
-                                        'bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400': order.status == 'cancelled'
-                                    }">
+                                    <span class="rounded-full px-2 py-0.5 text-[10px] font-medium
+                                    {% if order.status == 'pending' %}bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400
+                                    {% elif order.status == 'delivered' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400
+                                    {% elif order.status == 'processing' %}bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400
+                                    {% elif order.status == 'shipped' %}bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400
+                                    {% elif order.status == 'cancelled' %}bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400
+                                    {% else %}bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400{% endif %}">
                                     {{ order.get_status_display }}
                                 </span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">{{ order.created_at|date:"Y/m/d" }}</p>
                             </div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">{{ order.created_at|date:"Y/m/d" }}</p>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm font-bold text-slate-800 dark:text-white">{{ order.total_price|floatformat:0 }} تومان</span>
+                                <a href="{% url 'apps.orders:order_detail' order.id %}"
+                                   class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400">
+                                    <i data-lucide="chevron-left" class="size-4"></i>
+                                </a>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-sm font-bold text-slate-800 dark:text-white">{{ order.total_price|floatformat:0 }} تومان</span>
-                            <a href="" class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400">
-                                <i data-lucide="chevron-left" class="size-4"></i>
-                            </a>
-                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="py-8 text-center">
+                    <div class="size-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto dark:bg-slate-800">
+                        <i data-lucide="package" class="size-8 text-slate-400"></i>
                     </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="py-8 text-center">
-                <div class="size-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto dark:bg-slate-800">
-                    <i data-lucide="package" class="size-8 text-slate-400"></i>
+                    <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">هنوز
+                        سفارشی ثبت نکرده‌اید</p>
+                    <a href="{% url 'apps.products:product_list' %}" class="mt-2
+                inline-block text-sm text-blue-600 hover:underline dark:text-blue-400">شروع
+                        خرید</a>
                 </div>
-                <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">هنوز سفارشی ثبت نکرده‌اید</p>
-                <a href="{% url 'apps.products:product_list' %}" class="mt-2
-                inline-block text-sm text-blue-600 hover:underline dark:text-blue-400">شروع خرید</a>
-            </div>
-        {% endif %}
-    </div>
-
-    <!-- ===== فعالیت‌های اخیر ===== -->
-    <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
-        <h3 class="text-lg font-bold text-slate-800 dark:text-white">فعالیت‌های اخیر</h3>
-
-        <div class="mt-4 space-y-4">
-            <div class="flex items-start gap-3">
-                <div class="rounded-full bg-emerald-100 p-1.5 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
-                    <i data-lucide="check-circle" class="size-3.5"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm text-slate-700 dark:text-slate-300">سفارش #ORD-20240101-001 تکمیل شد</p>
-                    <p class="text-xs text-slate-400 dark:text-slate-500">۲ روز پیش</p>
-                </div>
-            </div>
-
-            <div class="flex items-start gap-3">
-                <div class="rounded-full bg-blue-100 p-1.5 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400">
-                    <i data-lucide="heart" class="size-3.5"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm text-slate-700 dark:text-slate-300">محصولی به علاقه‌مندی‌ها اضافه شد</p>
-                    <p class="text-xs text-slate-400 dark:text-slate-500">۳ روز پیش</p>
-                </div>
-            </div>
-
-            <div class="flex items-start gap-3">
-                <div class="rounded-full bg-amber-100 p-1.5 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400">
-                    <i data-lucide="clock" class="size-3.5"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm text-slate-700 dark:text-slate-300">سفارش #ORD-20240101-003 در انتظار پرداخت</p>
-                    <p class="text-xs text-slate-400 dark:text-slate-500">۵ روز پیش</p>
-                </div>
-            </div>
-
-            <div class="flex items-start gap-3">
-                <div class="rounded-full bg-indigo-100 p-1.5 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400">
-                    <i data-lucide="map-pin" class="size-3.5"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm text-slate-700 dark:text-slate-300">آدرس جدید اضافه شد</p>
-                    <p class="text-xs text-slate-400 dark:text-slate-500">۱ هفته پیش</p>
-                </div>
-            </div>
+            {% endif %}
         </div>
-    </div>
 
-</div>
+        <!-- ===== فعالیت‌های اخیر ===== -->
+        <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+            <h3 class="text-lg font-bold text-slate-800 dark:text-white">فعالیت‌های
+                اخیر</h3>
+
+            {% if recent_activities %}
+                <div class="mt-4 space-y-4">
+                    {% for activity in recent_activities %}
+                        <div class="flex items-start gap-3">
+                            <div class="rounded-full p-1.5
+                        {% if activity.type == 'order_created' or activity.type == 'order_paid' %}bg-emerald-100 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400
+                        {% elif activity.type == 'order_completed' %}bg-emerald-100 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400
+                        {% elif activity.type == 'order_cancelled' %}bg-rose-100 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400
+                        {% elif activity.type == 'wishlist_added' %}bg-rose-100 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400
+                        {% elif activity.type == 'wishlist_removed' %}bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400
+                        {% elif activity.type == 'address_added' or activity.type == 'address_updated' %}bg-indigo-100 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400
+                        {% elif activity.type == 'profile_updated' %}bg-blue-100 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400
+                        {% elif activity.type == 'review_added' %}bg-amber-100 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400
+                        {% elif activity.type == 'login' %}bg-cyan-100 text-cyan-600 dark:bg-cyan-950/30 dark:text-cyan-400
+                        {% elif activity.type == 'logout' %}bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400
+                        {% else %}bg-blue-100 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400{% endif %}">
+                                <i data-lucide="{{ activity.icon|default:'activity' }}"
+                                   class="size-3.5"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm text-slate-700 dark:text-slate-300">{{ activity.message }}</p>
+                                <p class="text-xs text-slate-400 dark:text-slate-500">{{ activity.created_at|timesince }}
+                                    پیش</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="py-8 text-center">
+                    <div class="size-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto dark:bg-slate-800">
+                        <i data-lucide="activity" class="size-8 text-slate-400"></i>
+                    </div>
+                    <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">فعالیتی
+                        یافت نشد</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
 
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        lucide.createIcons();
-    });
-</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
 {% endblock %}

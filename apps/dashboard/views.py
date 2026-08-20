@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Count, Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from apps.accounts.models import Profile, Address
+from apps.accounts.models import Profile, Address,UserActivity
 from apps.products.models import Product, Wishlist
 from apps.orders.models import Order, OrderItem
 from apps.accounts.forms import ProfileForm, AddressForm
@@ -15,7 +15,7 @@ def dashboard_view(request):
 
     total_orders = Order.objects.filter(user=user).count()
     pending_orders = Order.objects.filter(user=user, status='Pending').count()
-    completed_orders = Order.objects.filter(user=user, status='delivered').count()
+    delivered_orders = Order.objects.filter(user=user, status='delivered').count()
 
     wishlist_count = Wishlist.objects.filter(user=user).count()
     addresses_count = Address.objects.filter(user=user).count()
@@ -25,15 +25,22 @@ def dashboard_view(request):
 
     recent_orders = Order.objects.filter(user=user).order_by('-created_at')[:5]
 
+    recent_activities = UserActivity.objects.filter(
+        user=user
+    ).select_related('user')[:10]
+
     context = {
         'total_orders': total_orders,
-        'pending_orders': pending_orders,
-        'completed_orders': completed_orders,
-        'wishlist_count': wishlist_count,
-        'addresses_count': addresses_count,
-        'reward_points': reward_points,
-        'wallet_balance': wallet_balance,
-        'recent_orders': recent_orders,}
+    'pending_orders': pending_orders,
+    'delivered_orders': delivered_orders,
+    'wishlist_count': wishlist_count,
+    'addresses_count': addresses_count,
+    'reward_points': reward_points,
+    'wallet_balance': wallet_balance,
+    'recent_orders': recent_orders,
+    'recent_activities': recent_activities,
+
+     }
 
     return render(request,'dashboard/dashboard.html',context)
 

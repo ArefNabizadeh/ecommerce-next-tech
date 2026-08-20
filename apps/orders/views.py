@@ -7,7 +7,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from apps.cart.models import Cart
 from apps.products.models import Product, Review
-from apps.accounts.models import Address
+from apps.accounts.models import Address, UserActivity  # ← اضافه شد
 from .models import Order, OrderItem
 from .forms import CheckoutForm
 from apps.discounts.models import Coupon
@@ -106,6 +106,21 @@ def order_detail_view(request, order_id):
                 comment=comment,
                 is_approved=False
             )
+
+            # ===== ثبت فعالیت =====
+            UserActivity.log_activity(
+                user=request.user,
+                activity_type='review_added',
+                message=f'نظر برای محصول {product.name} ثبت شد',
+                icon='star',
+                metadata={
+                    'product_id': product.id,
+                    'product_name': product.name,
+                    'rating': rating
+                },
+                request=request
+            )
+
             messages.success(
                 request,
                 '✅ نظر شما با موفقیت ثبت شد. پس از تایید ادمین نمایش داده می‌شود.'
@@ -316,6 +331,20 @@ def checkout_view(request):
                 # ===== خالی کردن سبد خرید =====
                 cart_items.delete()
 
+                # ===== ثبت فعالیت =====
+                UserActivity.log_activity(
+                    user=request.user,
+                    activity_type='order_created',
+                    message=f'سفارش #{order.order_number} ثبت شد',
+                    icon='shopping-bag',
+                    metadata={
+                        'order_id': order.id,
+                        'order_number': order.order_number,
+                        'total_price': str(total_price)
+                    },
+                    request=request
+                )
+
                 messages.success(
                     request,
                     f'✅ سفارش شما با شماره #{order.order_number} با موفقیت ثبت شد.'
@@ -379,6 +408,19 @@ def cancel_order_view(request, order_id):
             # تغییر وضعیت سفارش
             order.status = Order.OrderStatus.CANCELLED
             order.save()
+
+        # ===== ثبت فعالیت =====
+        UserActivity.log_activity(
+            user=request.user,
+            activity_type='order_cancelled',
+            message=f'سفارش #{order.order_number} لغو شد',
+            icon='x-circle',
+            metadata={
+                'order_id': order.id,
+                'order_number': order.order_number
+            },
+            request=request
+        )
 
         messages.success(request, f'سفارش #{order.order_number} با موفقیت لغو شد.')
 

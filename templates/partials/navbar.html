@@ -2,19 +2,160 @@
 {% load static %}
 
 <header
-    x-data="{
+        x-data="{
         isScrolled: false,
         searchModal: false,
         cartDrawer: false,
         mobileDrawer: false,
-        cartCount: 3,
-        wishlistCount: 2
+        cartCount: {{ cart_items_count|default:0 }},
+        wishlistCount: {{ wishlist_count|default:0 }},
+        searchQuery: '',
+        searchResults: [],
+        isSearching: false,
+        recentSearches: JSON.parse(
+            localStorage.getItem('recentSearches') || '[]'
+        ),
+
+        searchController: null,
+
+        performSearch() {
+
+            const query = this.searchQuery.trim();
+
+            // اگر عبارت کمتر از دو کاراکتر بود
+            if (query.length < 2) {
+                this.searchResults = [];
+                this.isSearching = false;
+                return;
+            }
+
+            // اگر درخواست قبلی هنوز در حال اجراست
+            if (this.searchController) {
+                this.searchController.abort();
+            }
+
+            this.searchController = new AbortController();
+
+            this.isSearching = true;
+
+            const url = `{% url 'apps.products:search_api' %}?q=${encodeURIComponent(query)}`;
+
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                signal: this.searchController.signal
+            })
+
+            .then(response => {
+
+                if (!response.ok) {
+                    throw new Error(
+                        `HTTP error: ${response.status}`
+                    );
+                }
+
+                return response.json();
+            })
+
+            .then(data => {
+
+                this.searchResults = data.results || [];
+
+                this.isSearching = false;
+            })
+
+            .catch(error => {
+
+                // Abort کردن درخواست قبلی خطا محسوب نمی‌شود
+                if (error.name === 'AbortError') {
+                    return;
+                }
+
+                console.error(
+                    'Search API Error:',
+                    error
+                );
+
+                this.searchResults = [];
+                this.isSearching = false;
+            });
+        },
+
+        addToRecentSearches(query) {
+
+            query = query.trim();
+
+            if (query.length < 2) {
+                return;
+            }
+
+            let recent = JSON.parse(
+                localStorage.getItem('recentSearches') || '[]'
+            );
+
+            // حذف تکراری
+            recent = recent.filter(
+                item => item !== query
+            );
+
+            // اضافه کردن به اول لیست
+            recent.unshift(query);
+
+            // حداکثر 5 مورد
+            recent = recent.slice(0, 5);
+
+            localStorage.setItem(
+                'recentSearches',
+                JSON.stringify(recent)
+            );
+
+            this.recentSearches = recent;
+        },
+
+        clearRecentSearches() {
+
+            localStorage.removeItem(
+                'recentSearches'
+            );
+
+            this.recentSearches = [];
+        },
+
+        formatPrice(price) {
+
+            if (
+                price === null ||
+                price === undefined ||
+                price === ''
+            ) {
+                return '۰ تومان';
+            }
+
+            return Number(price).toLocaleString('fa-IR') + ' تومان';
+        },
+
+        closeSearch() {
+
+            this.searchModal = false;
+
+            this.searchQuery = '';
+            this.searchResults = [];
+            this.isSearching = false;
+        }
     }"
-    @scroll.window="isScrolled = window.scrollY > 20"
-    class="sticky top-0 z-50 transition-all duration-300 bg-white dark:bg-slate-950 border-b border-slate-200/50 dark:border-slate-800/50"
-    :class="isScrolled ? 'shadow-sm backdrop-blur-xl bg-white/80 dark:bg-slate-950/80' : ''"
-    role="banner"
-    aria-label="ناوبری اصلی"
+        @scroll.window="isScrolled = window.scrollY > 20"
+        @keydown.window.ctrl.k.prevent="
+        searchModal = true;
+        $nextTick(() => $refs.searchInput?.focus())
+    "
+        @keydown.escape="searchModal = false"
+        class="sticky top-0 z-50 transition-all duration-300 bg-white dark:bg-slate-950 border-b border-slate-200/50 dark:border-slate-800/50"
+        :class="isScrolled ? 'shadow-sm backdrop-blur-xl bg-white/80 dark:bg-slate-950/80' : ''"
+        role="banner"
+        aria-label="ناوبری اصلی"
 >
     <div class="container max-w-7xl mx-auto px-4 sm:px-6">
         <div class="flex items-center justify-between h-16 md:h-20">
@@ -22,20 +163,27 @@
             <!-- ===== لوگو ===== -->
             <div class="flex items-center gap-3 lg:gap-6">
                 <button
-                    @click="mobileDrawer = true"
-                    class="lg:hidden p-2 -mr-2 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
-                    aria-label="باز کردن منو"
+                        @click="mobileDrawer = true"
+                        class="lg:hidden p-2 -mr-2 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
+                        aria-label="باز کردن منو"
                 >
                     <i data-lucide="menu" class="size-5"></i>
                 </button>
 
-                <a href="/" class="flex items-center gap-2.5 group">
+                <a href="{% url 'apps.core:home' %}"
+                   class="flex items-center gap-2.5 group">
                     <div class="relative size-9 md:size-10">
                         <svg viewBox="0 0 40 40" class="size-full">
-                            <rect x="2" y="2" width="36" height="36" rx="10" fill="#2563EB"/>
-                            <path d="M12 28L20 12L28 28" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                            <circle cx="20" cy="20" r="16" stroke="white" stroke-width="1.5" fill="none" opacity="0.3"/>
-                            <path d="M14 22L20 16L26 22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.5"/>
+                            <rect x="2" y="2" width="36" height="36" rx="10"
+                                  fill="#2563EB"/>
+                            <path d="M12 28L20 12L28 28" stroke="white" stroke-width="3"
+                                  stroke-linecap="round" stroke-linejoin="round"
+                                  fill="none"/>
+                            <circle cx="20" cy="20" r="16" stroke="white"
+                                    stroke-width="1.5" fill="none" opacity="0.3"/>
+                            <path d="M14 22L20 16L26 22" stroke="white" stroke-width="2"
+                                  stroke-linecap="round" stroke-linejoin="round"
+                                  fill="none" opacity="0.5"/>
                         </svg>
                     </div>
                     <span class="text-lg md:text-xl font-bold tracking-tight transition-colors duration-300 text-slate-800 dark:text-white">
@@ -50,242 +198,871 @@
 
             <!-- ===== منوی دسکتاپ ===== -->
             <nav class="hidden lg:flex items-center gap-0.5" aria-label="منوی اصلی">
-                <a href="/" class="px-3 py-2 text-sm font-medium rounded-xl transition-colors text-slate-600 hover:text-blue-600 hover:bg-slate-50/50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/50">صفحه اصلی</a>
-                <a href="{% url 'apps.core:home' %}#featured-product" class="px-3 py-2 text-sm font-medium rounded-xl transition-colors text-slate-600 hover:text-blue-600 hover:bg-slate-50/50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/50">محصولات</a>
+                <a href="{% url 'apps.core:home' %}"
+                   class="px-3 py-2 text-sm font-medium rounded-xl transition-colors text-slate-600 hover:text-blue-600 hover:bg-slate-50/50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/50">صفحه
+                    اصلی</a>
+                <a href="{% url 'apps.products:product_list' %}"
+                   class="px-3 py-2 text-sm font-medium rounded-xl transition-colors text-slate-600 hover:text-blue-600 hover:bg-slate-50/50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/50">محصولات</a>
 
                 <!-- ===== مگا منو ===== -->
-                <div x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" class="relative">
-                    <button @click="megaOpen = !megaOpen" class="px-3 py-2 text-sm font-medium rounded-xl transition-colors flex items-center gap-1 text-slate-600 hover:text-blue-600 hover:bg-slate-50/50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/50" aria-label="دسته‌بندی‌ها" :aria-expanded="megaOpen">
+                <div x-data="{ megaOpen: false }" @mouseenter="megaOpen = true"
+                     @mouseleave="megaOpen = false" class="relative">
+                    <button @click="megaOpen = !megaOpen"
+                            class="px-3 py-2 text-sm font-medium rounded-xl transition-colors flex items-center gap-1 text-slate-600 hover:text-blue-600 hover:bg-slate-50/50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/50"
+                            aria-label="دسته‌بندی‌ها" :aria-expanded="megaOpen">
                         دسته‌بندی‌ها
-                        <i data-lucide="chevron-down" class="size-3.5 transition-transform duration-200" :class="megaOpen ? 'rotate-180' : ''"></i>
+                        <i data-lucide="chevron-down"
+                           class="size-3.5 transition-transform duration-200"
+                           :class="megaOpen ? 'rotate-180' : ''"></i>
                     </button>
 
-                    <div x-show="megaOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="fixed left-0 right-0 top-[64px] md:top-[80px] z-[60] border-b shadow-xl bg-white border-slate-200/50 dark:bg-slate-900 dark:border-slate-800/50" style="width: 100vw;" role="menu" aria-label="دسته‌بندی‌ها" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false">
+                    <div x-show="megaOpen"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-2"
+                         class="fixed left-0 right-0 top-[64px] md:top-[80px] z-[60] border-b shadow-xl bg-white border-slate-200/50 dark:bg-slate-900 dark:border-slate-800/50"
+                         style="width: 100vw;" role="menu" aria-label="دسته‌بندی‌ها"
+                         @mouseenter="megaOpen = true" @mouseleave="megaOpen = false">
                         <div class="container max-w-7xl mx-auto px-4 sm:px-6 py-8">
                             <div class="grid grid-cols-4 gap-8">
                                 <div>
                                     <h4 class="text-sm font-semibold mb-3 pb-2 border-b border-slate-200/50 dark:border-slate-800/50 text-slate-800 dark:text-white">
-                                        <i data-lucide="smartphone" class="size-4 inline-block ml-2 text-blue-600"></i>
+                                        <i data-lucide="smartphone"
+                                           class="size-4 inline-block ml-2 text-blue-600"></i>
                                         محصولات دیجیتال
                                     </h4>
                                     <ul class="space-y-2.5">
-                                        <li><a href="#" class="flex items-center gap-3 text-sm rounded-lg transition-colors group text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-white"><i data-lucide="smartphone" class="size-4"></i>گوشی موبایل</a></li>
-                                        <li><a href="#" class="flex items-center gap-3 text-sm rounded-lg transition-colors group text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-white"><i data-lucide="laptop" class="size-4"></i>لپ‌تاپ</a></li>
-                                        <li><a href="#" class="flex items-center gap-3 text-sm rounded-lg transition-colors group text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-white"><i data-lucide="headphones" class="size-4"></i>هدفون</a></li>
-                                        <li><a href="#" class="flex items-center gap-3 text-sm rounded-lg transition-colors group text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-white"><i data-lucide="watch" class="size-4"></i>ساعت هوشمند</a></li>
+                                        {% for category in categories|slice:":4" %}
+                                            <li>
+                                                <a href="{% url 'apps.products:product_list' %}?category={{ category.slug }}"
+                                                   class="flex items-center gap-3 text-sm rounded-lg transition-colors group text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-white">
+                                                    {% if category.icon %}
+                                                        <i data-lucide="{{ category.icon }}"
+                                                           class="size-4"></i>
+                                                    {% else %}
+                                                        <i data-lucide="folder"
+                                                           class="size-4"></i>
+                                                    {% endif %}
+                                                    {{ category.name }}
+                                                </a>
+                                            </li>
+                                        {% empty %}
+                                            <li class="text-sm text-slate-400">
+                                                دسته‌بندی‌ای یافت نشد
+                                            </li>
+                                        {% endfor %}
                                     </ul>
                                 </div>
                                 <div>
                                     <h4 class="text-sm font-semibold mb-3 pb-2 border-b border-slate-200/50 dark:border-slate-800/50 text-slate-800 dark:text-white">
-                                        <i data-lucide="package" class="size-4 inline-block ml-2 text-blue-600"></i>
+                                        <i data-lucide="package"
+                                           class="size-4 inline-block ml-2 text-blue-600"></i>
                                         لوازم جانبی
                                     </h4>
                                     <ul class="space-y-2.5">
-                                        <li><a href="#" class="flex items-center gap-3 text-sm rounded-lg transition-colors group text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-white"><i data-lucide="battery-charging" class="size-4"></i>شارژر</a></li>
-                                        <li><a href="#" class="flex items-center gap-3 text-sm rounded-lg transition-colors group text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-white"><i data-lucide="briefcase" class="size-4"></i>کیف و کاور</a></li>
-                                        <li><a href="#" class="flex items-center gap-3 text-sm rounded-lg transition-colors group text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-white"><i data-lucide="shield" class="size-4"></i>محافظ صفحه</a></li>
+                                        <li><a href="#"
+                                               class="flex items-center gap-3 text-sm rounded-lg transition-colors group text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-white"><i
+                                                data-lucide="battery-charging"
+                                                class="size-4"></i>شارژر</a></li>
+                                        <li><a href="#"
+                                               class="flex items-center gap-3 text-sm rounded-lg transition-colors group text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-white"><i
+                                                data-lucide="briefcase"
+                                                class="size-4"></i>کیف و کاور</a></li>
+                                        <li><a href="#"
+                                               class="flex items-center gap-3 text-sm rounded-lg transition-colors group text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-white"><i
+                                                data-lucide="shield" class="size-4"></i>محافظ
+                                            صفحه</a></li>
                                     </ul>
                                 </div>
                                 <div>
                                     <h4 class="text-sm font-semibold mb-3 pb-2 border-b border-slate-200/50 dark:border-slate-800/50 text-slate-800 dark:text-white">
-                                        <i data-lucide="award" class="size-4 inline-block ml-2 text-blue-600"></i>
+                                        <i data-lucide="award"
+                                           class="size-4 inline-block ml-2 text-blue-600"></i>
                                         برندهای محبوب
                                     </h4>
                                     <ul class="space-y-2.5">
-                                        <li><a href="#" class="flex items-center gap-3 text-sm rounded-lg transition-colors group text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-white"><i data-lucide="cpu" class="size-4"></i>سامسونگ</a></li>
-                                        <li><a href="#" class="flex items-center gap-3 text-sm rounded-lg transition-colors group text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-white"><i data-lucide="apple" class="size-4"></i>اپل</a></li>
-                                        <li><a href="#" class="flex items-center gap-3 text-sm rounded-lg transition-colors group text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-white"><i data-lucide="smartphone" class="size-4"></i>شیائومی</a></li>
+                                        {% for brand in brands|slice:":3" %}
+                                            <li>
+                                                <a href="{% url 'apps.products:product_list' %}?brand={{ brand.slug }}"
+                                                   class="flex items-center gap-3 text-sm rounded-lg transition-colors group text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-white">
+                                                    {% if brand.logo %}
+                                                        <img src="{{ brand.logo.url }}"
+                                                             alt="{{ brand.name }}"
+                                                             class="size-4 object-contain">
+                                                    {% else %}
+                                                        <i data-lucide="tag"
+                                                           class="size-4"></i>
+                                                    {% endif %}
+                                                    {{ brand.name }}
+                                                </a>
+                                            </li>
+                                        {% empty %}
+                                            <li class="text-sm text-slate-400">برندی
+                                                یافت نشد
+                                            </li>
+                                        {% endfor %}
                                     </ul>
                                 </div>
                                 <div>
                                     <div class="rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-white h-full flex flex-col justify-between">
                                         <div>
                                             <span class="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full inline-block">🔥 تخفیف ویژه</span>
-                                            <h5 class="text-xl font-bold leading-tight mt-3">خرید از<br>دسته‌بندی‌ها</h5>
-                                            <p class="text-sm text-blue-100 mt-2">تا ۴۰٪ تخفیف برای<br>محصولات منتخب</p>
+                                            <h5 class="text-xl font-bold leading-tight mt-3">
+                                                خرید از<br>دسته‌بندی‌ها</h5>
+                                            <p class="text-sm text-blue-100 mt-2">تا ۴۰٪
+                                                تخفیف برای<br>محصولات منتخب</p>
                                         </div>
-                                        <a href="#" class="mt-4 inline-block bg-white text-blue-600 px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-50 transition-colors text-center">
+                                        <a href="{% url 'apps.products:product_list' %}"
+                                           class="mt-4 inline-block bg-white text-blue-600 px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-50 transition-colors text-center">
                                             مشاهده همه
-                                            <i data-lucide="arrow-left" class="size-4 inline-block mr-1"></i>
+                                            <i data-lucide="arrow-left"
+                                               class="size-4 inline-block mr-1"></i>
                                         </a>
                                     </div>
                                 </div>
                             </div>
                             <div class="mt-8 pt-4 border-t border-slate-200/50 dark:border-slate-800/50 text-center">
-                                <a href="#" class="text-sm font-medium text-blue-600 hover:underline inline-flex items-center gap-1">مشاهده همه دسته‌بندی‌ها <i data-lucide="arrow-left" class="size-4"></i></a>
+                                <a href="{% url 'apps.products:category_list' %}"
+                                   class="text-sm font-medium text-blue-600 hover:underline inline-flex items-center gap-1">مشاهده
+                                    همه دسته‌بندی‌ها <i data-lucide="arrow-left"
+                                                        class="size-4"></i></a>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <a href="{% url 'apps.core:home' %}#flash-sale" class="px-3 py-2 text-sm font-medium rounded-xl transition-colors text-slate-600 hover:text-blue-600 hover:bg-slate-50/50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/50">تخفیف‌ها</a>
-                <a href="{% url 'apps.core:home' %}#blog" class="px-3 py-2 text-sm font-medium rounded-xl transition-colors text-slate-600 hover:text-blue-600 hover:bg-slate-50/50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/50">بلاگ</a>
-                <a href="{% url 'apps.core:home' %}#footer" class="px-3 py-2 text-sm font-medium rounded-xl transition-colors text-slate-600 hover:text-blue-600 hover:bg-slate-50/50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/50">تماس</a>
+                <a href="{% url 'apps.products:product_list' %}?has_discount=true"
+                   class="px-3 py-2 text-sm font-medium rounded-xl transition-colors text-slate-600 hover:text-blue-600 hover:bg-slate-50/50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/50">تخفیف‌ها</a>
+                <a href="{% url 'apps.blog:blog_list' %}"
+                   class="px-3 py-2 text-sm font-medium rounded-xl transition-colors text-slate-600 hover:text-blue-600 hover:bg-slate-50/50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/50">بلاگ</a>
+                <a href="#footer"
+                   class="px-3 py-2 text-sm font-medium rounded-xl transition-colors text-slate-600 hover:text-blue-600 hover:bg-slate-50/50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/50">تماس</a>
             </nav>
 
             <!-- ===== ابزارها ===== -->
             <div class="flex items-center gap-1 md:gap-2">
 
-                <!-- جستجو -->
-                <button @click="searchModal = true" @keydown.ctrl.k.prevent="searchModal = true" class="hidden lg:flex items-center gap-3 px-4 py-2 rounded-xl border transition-colors text-sm border-slate-200 text-slate-500 hover:border-blue-400 hover:bg-slate-50/50 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800/50" aria-label="جستجو">
-                    <i data-lucide="search" class="size-4"></i>
-                    <span class="text-slate-400">جستجو...</span>
-                    <kbd class="px-2 py-1 text-[10px] font-mono rounded-md bg-slate-100/50 text-slate-500 border border-slate-200/50 dark:bg-slate-800/50 dark:text-slate-400 dark:border-slate-700/50">Ctrl+K</kbd>
+                <!-- ================================================= -->
+                <!-- جستجو دسکتاپ -->
+                <!-- ================================================= -->
+
+                <button
+                        @click="
+            searchModal = true;
+            $nextTick(() => $refs.searchInput?.focus())
+        "
+                        class="hidden lg:flex items-center gap-3 px-4 py-2 rounded-xl border transition-colors text-sm border-slate-200 text-slate-500 hover:border-blue-400 hover:bg-slate-50/50 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800/50"
+                        aria-label="جستجو"
+                        type="button"
+                >
+
+                    <i
+                            data-lucide="search"
+                            class="size-4"
+                    ></i>
+
+                    <span class="text-slate-400">
+            جستجو...
+        </span>
+
+                    <kbd
+                            class="px-2 py-1 text-[10px] font-mono rounded-md bg-slate-100/50 text-slate-500 border border-slate-200/50 dark:bg-slate-800/50 dark:text-slate-400 dark:border-slate-700/50"
+                    >
+                        Ctrl+K
+                    </kbd>
+
                 </button>
 
-                <button @click="searchModal = true" class="lg:hidden p-2.5 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors" aria-label="جستجو">
-                    <i data-lucide="search" class="size-5"></i>
+
+                <!-- ================================================= -->
+                <!-- جستجو موبایل -->
+                <!-- ================================================= -->
+
+                <button
+                        @click="
+            searchModal = true;
+            $nextTick(() => $refs.searchInput?.focus())
+        "
+                        class="lg:hidden p-2.5 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
+                        aria-label="جستجو"
+                        type="button"
+                >
+
+                    <i
+                            data-lucide="search"
+                            class="size-5"
+                    ></i>
+
                 </button>
 
-                <!-- علاقه‌مندی‌ها -->
-                <a href="{% url 'apps.dashboard:wishlist' %}" class="relative p-2.5 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors" aria-label="علاقه‌مندی‌ها">
-                    <i data-lucide="heart" class="size-5"></i>
-                    <span x-show="wishlistCount > 0" x-text="wishlistCount" class="absolute -top-0.5 -right-0.5 flex items-center justify-center size-4 text-[10px] font-medium text-white bg-rose-500 rounded-full"></span>
-                </a>
 
-                <!-- سبد خرید -->
-                <a href="{% url 'apps.cart:cart_detail' %}" class="relative p-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm" aria-label="سبد خرید">
-                    <i data-lucide="shopping-bag" class="size-5"></i>
-                    <span x-show="cartCount > 0" x-text="cartCount" class="absolute -top-0.5 -right-0.5 flex items-center justify-center size-4 text-[10px] font-medium text-white bg-amber-500 rounded-full"></span>
-                </a>
+                <!-- ================================================= -->
+                <!-- مودال جستجو -->
+                <!-- ================================================= -->
 
-                <!-- ===== پروفایل / منوی کاربر ===== -->
-                <div x-data="{ userMenu: false }" @click.outside="userMenu = false" class="relative">
+                <div
+                        x-show="searchModal"
 
-                    <!-- ===== دکمه پروفایل ===== -->
-                    <button @click="userMenu = !userMenu" class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors" aria-label="حساب کاربری">
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
 
-                        {% if user.is_authenticated %}
-                            <!-- ===== آواتار با عکس ===== -->
-                            <div class="size-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-sm font-bold text-white overflow-hidden flex-shrink-0">
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0"
+
+                        class="fixed inset-0 z-[100] flex items-start justify-center p-4 bg-black/40 backdrop-blur-sm"
+
+                        @click.self="closeSearch()"
+
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="جستجوی محصولات"
+
+                        x-cloak
+                >
+
+                    <!-- ================================================= -->
+                    <!-- پنجره اصلی -->
+                    <!-- ================================================= -->
+
+                    <div
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0 scale-95 -translate-y-8"
+                            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                            x-transition:leave-end="opacity-0 scale-95 -translate-y-8"
+
+                            class="w-full max-w-2xl mt-16 md:mt-24 rounded-2xl shadow-2xl border p-6 bg-white border-slate-200/50 dark:bg-slate-900 dark:border-slate-800/50"
+                    >
+
+                        <!-- ================================================= -->
+                        <!-- هدر سرچ -->
+                        <!-- ================================================= -->
+
+                        <div
+                                class="flex items-center gap-3 pb-4 border-b border-slate-200/50 dark:border-slate-800/50"
+                        >
+
+                            <i
+                                    data-lucide="search"
+                                    class="size-5 text-slate-400 shrink-0"
+                            ></i>
+
+
+                            <input
+                                    type="text"
+
+                                    x-model="searchQuery"
+
+                                    @input.debounce.300ms="performSearch()"
+
+                                    placeholder="جستجوی محصول، برند یا دسته‌بندی..."
+
+                                    class="flex-1 text-lg outline-none bg-transparent text-slate-800 placeholder:text-slate-400 dark:text-white dark:placeholder:text-slate-500"
+
+                                    x-ref="searchInput"
+
+                                    @keydown.enter="
+                        if (searchQuery.trim().length >= 2) {
+                            addToRecentSearches(searchQuery);
+                            window.location.href = `{% url 'apps.products:product_list' %}?q=${encodeURIComponent(searchQuery.trim())}`;
+                        }
+                    "
+
+                                    autocomplete="off"
+
+                                    aria-label="جستجوی محصول"
+                            >
+
+
+                            <!-- ================================================= -->
+                            <!-- دکمه بستن -->
+                            <!-- ================================================= -->
+
+                            <button
+                                    @click="closeSearch()"
+
+                                    class="p-2 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
+
+                                    aria-label="بستن"
+
+                                    type="button"
+                            >
+
+                                <i
+                                        data-lucide="x"
+                                        class="size-5"
+                                ></i>
+
+                            </button>
+
+                        </div>
+
+
+                        <!-- ================================================= -->
+                        <!-- محتویات -->
+                        <!-- ================================================= -->
+
+                        <div class="mt-4">
+
+
+                            <!-- ================================================= -->
+                            <!-- در حال جستجو -->
+                            <!-- ================================================= -->
+
+                            <template x-if="isSearching">
+
+                                <div class="text-center py-8">
+
+                                    <div
+                                            class="flex items-center justify-center gap-2"
+                                    >
+
+                                        <svg
+                                                class="size-6 animate-spin text-blue-600"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                        >
+
+                                            <circle
+                                                    class="opacity-25"
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                    stroke="currentColor"
+                                                    stroke-width="4"
+                                            ></circle>
+
+                                            <path
+                                                    class="opacity-75"
+                                                    fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            ></path>
+
+                                        </svg>
+
+                                        <span
+                                                class="text-sm text-slate-500 dark:text-slate-400"
+                                        >
+                                در حال جستجو...
+                            </span>
+
+                                    </div>
+
+                                </div>
+
+                            </template>
+
+
+                            <!-- ================================================= -->
+                            <!-- نتایج -->
+                            <!-- ================================================= -->
+
+                            <template
+                                    x-if="
+                        !isSearching &&
+                        searchQuery.trim().length > 0 &&
+                        searchResults.length > 0
+                    "
+                            >
+
+                                <div>
+
+                                    <div
+                                            class="flex items-center justify-between mb-3"
+                                    >
+
+                                        <p
+                                                class="text-sm text-slate-500 dark:text-slate-400"
+                                        >
+
+                                <span
+                                        x-text="`${searchResults.length} نتیجه برای '${searchQuery}'`"
+                                ></span>
+
+                                        </p>
+
+
+                                        <a
+                                                :href="`{% url 'apps.products:product_list' %}?q=${encodeURIComponent(searchQuery.trim())}`"
+
+                                                @click="addToRecentSearches(searchQuery)"
+
+                                                class="text-xs text-blue-600 hover:underline dark:text-blue-400"
+                                        >
+                                            مشاهده همه نتایج
+                                        </a>
+
+                                    </div>
+
+
+                                    <!-- لیست محصولات -->
+
+                                    <div
+                                            class="max-h-96 overflow-y-auto space-y-2"
+                                    >
+
+                                        <template
+                                                x-for="product in searchResults"
+                                                :key="product.id"
+                                        >
+
+                                            <a
+                                                    :href="product.url"
+
+                                                    @click="addToRecentSearches(searchQuery)"
+
+                                                    class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group"
+                                            >
+
+                                                <!-- تصویر -->
+
+                                                <div
+                                                        class="size-12 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden flex-shrink-0"
+                                                >
+
+                                                    <img
+                                                            :src="
+                                                product.image ||
+                                                '{% static 'images/placeholder.png' %}'
+                                            "
+
+                                                            :alt="product.name"
+
+                                                            class="size-full object-cover"
+
+                                                            loading="lazy"
+                                                    >
+
+                                                </div>
+
+
+                                                <!-- اطلاعات -->
+
+                                                <div
+                                                        class="flex-1 min-w-0"
+                                                >
+
+                                                    <p
+                                                            class="text-sm font-medium text-slate-800 dark:text-white group-hover:text-blue-600 transition-colors truncate"
+
+                                                            x-text="product.name"
+                                                    ></p>
+
+
+                                                    <p
+                                                            class="text-xs text-slate-500 dark:text-slate-400 truncate"
+
+                                                            x-text="
+                                                product.category
+                                                    ? product.category
+                                                    : 'بدون دسته‌بندی'
+                                            "
+                                                    ></p>
+
+                                                </div>
+
+
+                                                <!-- قیمت -->
+
+                                                <div
+                                                        class="text-sm font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap"
+
+                                                        x-text="formatPrice(product.price)"
+                                                ></div>
+
+                                            </a>
+
+                                        </template>
+
+                                    </div>
+
+                                </div>
+
+                            </template>
+
+
+                            <!-- ================================================= -->
+                            <!-- بدون نتیجه -->
+                            <!-- ================================================= -->
+
+                            <template
+                                    x-if="
+                        !isSearching &&
+                        searchQuery.trim().length >= 2 &&
+                        searchResults.length === 0
+                    "
+                            >
+
+                                <div class="text-center py-8">
+
+                                    <i
+                                            data-lucide="search-x"
+
+                                            class="size-12 text-slate-300 dark:text-slate-600 mx-auto"
+                                    ></i>
+
+
+                                    <p
+                                            class="mt-2 text-sm text-slate-500 dark:text-slate-400"
+                                    >
+
+                                        نتیجه‌ای برای
+                                        "<span x-text="searchQuery"></span>"
+                                        یافت نشد
+
+                                    </p>
+
+
+                                    <p
+                                            class="mt-1 text-xs text-slate-400 dark:text-slate-500"
+                                    >
+                                        عبارت دیگری را امتحان کنید.
+                                    </p>
+
+                                </div>
+
+                            </template>
+
+
+                            <!-- ================================================= -->
+                            <!-- حالت اولیه -->
+                            <!-- ================================================= -->
+
+                            <template
+                                    x-if="searchQuery.trim().length === 0"
+                            >
+
+                                <div>
+
+                                    <p
+                                            class="text-sm text-slate-500 dark:text-slate-400"
+                                    >
+                                        جستجوهای محبوب
+                                    </p>
+
+
+                                    <div
+                                            class="flex flex-wrap gap-2 mt-3"
+                                    >
+
+                                        <a
+                                                href="{% url 'apps.products:product_list' %}?q=سامسونگ"
+
+                                                class="px-3 py-1.5 text-sm rounded-full border transition-colors border-slate-200 text-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/50"
+                                        >
+                                            گوشی سامسونگ
+                                        </a>
+
+
+                                        <a
+                                                href="{% url 'apps.products:product_list' %}?q=ایسوس"
+
+                                                class="px-3 py-1.5 text-sm rounded-full border transition-colors border-slate-200 text-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/50"
+                                        >
+                                            لپ‌تاپ ایسوس
+                                        </a>
+
+
+                                        <a
+                                                href="{% url 'apps.products:product_list' %}?q=سونی"
+
+                                                class="px-3 py-1.5 text-sm rounded-full border transition-colors border-slate-200 text-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/50"
+                                        >
+                                            هدفون سونی
+                                        </a>
+
+
+                                        <a
+                                                href="{% url 'apps.products:product_list' %}?q=لپ‌تاپ"
+
+                                                class="px-3 py-1.5 text-sm rounded-full border transition-colors border-slate-200 text-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/50"
+                                        >
+                                            لپ‌تاپ
+                                        </a>
+
+
+                                        <a
+                                                href="{% url 'apps.products:product_list' %}?q=هدفون"
+
+                                                class="px-3 py-1.5 text-sm rounded-full border transition-colors border-slate-200 text-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/50"
+                                        >
+                                            هدفون
+                                        </a>
+
+                                    </div>
+
+                                </div>
+
+                            </template>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ===== علاقه‌مندی‌ها ===== -->
+            <a href="{% url 'apps.dashboard:wishlist' %}"
+               class="relative p-2.5 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
+               aria-label="علاقه‌مندی‌ها">
+                <i data-lucide="heart" class="size-5"></i>
+                <span x-show="wishlistCount > 0" x-text="wishlistCount"
+                      class="absolute -top-0.5 -right-0.5 flex items-center justify-center size-4 text-[10px] font-medium text-white bg-rose-500 rounded-full"></span>
+            </a>
+
+            <!-- ===== سبد خرید ===== -->
+            <a href="{% url 'apps.cart:cart_detail' %}"
+               class="relative p-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm"
+               aria-label="سبد خرید">
+                <i data-lucide="shopping-bag" class="size-5"></i>
+                <span x-show="cartCount > 0" x-text="cartCount"
+                      class="absolute -top-0.5 -right-0.5 flex items-center justify-center size-4 text-[10px] font-medium text-white bg-amber-500 rounded-full"></span>
+            </a>
+
+            <!-- ===== پروفایل / منوی کاربر ===== -->
+            <div x-data="{ userMenu: false }" @click.outside="userMenu = false"
+                 class="relative">
+
+                <button @click="userMenu = !userMenu"
+                        class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
+                        aria-label="حساب کاربری">
+
+                    {% if user.is_authenticated %}
+                        <div class="size-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-sm font-bold text-white overflow-hidden flex-shrink-0">
+                            {% if user.profile.avatar %}
+                                <img src="{{ user.profile.avatar.url }}"
+                                     alt="{{ user.get_full_name|default:user.username }}"
+                                     class="size-full rounded-full object-cover">
+                            {% else %}
+                                <span>{{ user.get_full_name|slice:":1"|default:user.username|slice:":1"|upper }}</span>
+                            {% endif %}
+                        </div>
+                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">
+                                {{ user.get_full_name|default:user.username }}
+                            </span>
+                    {% else %}
+                        <div class="size-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                            <i data-lucide="user"
+                               class="size-5 text-slate-500 dark:text-slate-400"></i>
+                        </div>
+                    {% endif %}
+
+                    <i data-lucide="chevron-down"
+                       class="size-4 transition-transform duration-200"
+                       :class="userMenu ? 'rotate-180' : ''"></i>
+                </button>
+
+                <!-- ===== منوی کشویی ===== -->
+                <div x-show="userMenu"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 -translate-y-2"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 -translate-y-2"
+                     class="absolute left-0 mt-2 w-64 rounded-2xl shadow-xl border p-2 bg-white border-slate-200/50 dark:bg-slate-900 dark:border-slate-800/50"
+                     role="menu">
+
+                    {% if user.is_authenticated %}
+                        <div class="flex items-center gap-3 px-3 py-2.5 border-b border-slate-200/50 dark:border-slate-800/50">
+                            <div class="size-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-sm font-bold text-white overflow-hidden flex-shrink-0">
                                 {% if user.profile.avatar %}
-                                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}" class="size-full rounded-full object-cover">
+                                    <img src="{{ user.profile.avatar.url }}"
+                                         alt="{{ user.get_full_name|default:user.username }}"
+                                         class="size-full rounded-full object-cover">
                                 {% else %}
                                     <span>{{ user.get_full_name|slice:":1"|default:user.username|slice:":1"|upper }}</span>
                                 {% endif %}
                             </div>
-                            <span class="text-sm font-medium text-slate-700 dark:text-slate-300 hidden sm:block">
-                                {{ user.get_full_name|default:user.username }}
-                            </span>
-                        {% else %}
-                            <!-- ===== کاربر مهمان ===== -->
-                            <div class="size-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                                <i data-lucide="user" class="size-5 text-slate-500 dark:text-slate-400"></i>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-slate-800 dark:text-white truncate">
+                                    {{ user.get_full_name|default:user.username }}
+                                </p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ user.email }}</p>
                             </div>
-                        {% endif %}
+                        </div>
 
-                        <i data-lucide="chevron-down" class="size-4 transition-transform duration-200" :class="userMenu ? 'rotate-180' : ''"></i>
-                    </button>
+                        <a href="{% url 'apps.dashboard:dashboard' %}"
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white">
+                            <i data-lucide="layout-dashboard" class="size-4"></i>
+                            داشبورد
+                        </a>
 
-                    <!-- ===== منوی کشویی ===== -->
-                    <div x-show="userMenu" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2" class="absolute left-0 mt-2 w-64 rounded-2xl shadow-xl border p-2 bg-white border-slate-200/50 dark:bg-slate-900 dark:border-slate-800/50" role="menu">
+                        <a href="{% url 'apps.orders:order_list' %}"
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white">
+                            <i data-lucide="package" class="size-4"></i> سفارشات
+                        </a>
 
-                        {% if user.is_authenticated %}
-                            <!-- ===== کاربر لاگین شده با آواتار ===== -->
-                            <div class="flex items-center gap-3 px-3 py-2.5 border-b border-slate-200/50 dark:border-slate-800/50">
-                                <!-- آواتار کوچک در منو -->
-                                <div class="size-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-sm font-bold text-white overflow-hidden flex-shrink-0">
-                                    {% if user.profile.avatar %}
-                                        <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}" class="size-full rounded-full object-cover">
-                                    {% else %}
-                                        <span>{{ user.get_full_name|slice:":1"|default:user.username|slice:":1"|upper }}</span>
-                                    {% endif %}
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-semibold text-slate-800 dark:text-white truncate">
-                                        {{ user.get_full_name|default:user.username }}
-                                    </p>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ user.email }}</p>
-                                </div>
+                        <a href="{% url 'apps.dashboard:wishlist' %}"
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white">
+                            <i data-lucide="heart" class="size-4"></i> علاقه‌مندی‌ها
+                        </a>
+
+                        <a href="{% url 'apps.dashboard:profile' %}"
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white">
+                            <i data-lucide="user" class="size-4"></i> پروفایل
+                        </a>
+
+                        <hr class="my-1 border-slate-200/50 dark:border-slate-800/50">
+
+                        <form method="POST"
+                              action="{% url 'apps.accounts:logout' %}">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm text-rose-600 hover:bg-rose-50/50 dark:text-rose-400 dark:hover:bg-rose-950/30">
+                                <i data-lucide="log-out" class="size-4"></i> خروج
+                            </button>
+                        </form>
+
+                    {% else %}
+                        <div class="px-3 py-3 text-center">
+                            <div class="size-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-2">
+                                <i data-lucide="user"
+                                   class="size-6 text-slate-400 dark:text-slate-500"></i>
                             </div>
+                            <p class="text-sm font-medium text-slate-800 dark:text-white">
+                                خوش آمدید</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                وارد شوید یا ثبت‌نام کنید</p>
+                        </div>
 
-                            <a href="{% url 'apps.dashboard:dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white">
-                                <i data-lucide="layout-dashboard" class="size-4"></i> داشبورد
-                            </a>
+                        <hr class="border-slate-200/50 dark:border-slate-800/50">
 
-                            <a href="{% url 'apps.orders:order_list' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white">
-                                <i data-lucide="package" class="size-4"></i> سفارشات
-                            </a>
+                        <a href="{% url 'apps.accounts:login' %}"
+                           class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl transition-colors text-sm font-medium bg-blue-600 text-white hover:bg-blue-700">
+                            <i data-lucide="log-in" class="size-4"></i> ورود
+                        </a>
 
-                            <a href="{% url 'apps.dashboard:profile' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white">
-                                <i data-lucide="user" class="size-4"></i> پروفایل
-                            </a>
+                        <a href="{% url 'apps.accounts:register' %}"
+                           class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl transition-colors text-sm text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white">
+                            <i data-lucide="user-plus" class="size-4"></i> ثبت‌نام
+                        </a>
+                    {% endif %}
 
-                            <hr class="my-1 border-slate-200/50 dark:border-slate-800/50">
-
-                            <form method="POST" action="{% url 'apps.accounts:logout' %}">
-                                {% csrf_token %}
-                                <button type="submit" class="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm text-rose-600 hover:bg-rose-50/50 dark:text-rose-400 dark:hover:bg-rose-950/30">
-                                    <i data-lucide="log-out" class="size-4"></i> خروج
-                                </button>
-                            </form>
-
-                        {% else %}
-                            <!-- ===== کاربر مهمان ===== -->
-                            <div class="px-3 py-3 text-center">
-                                <div class="size-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-2">
-                                    <i data-lucide="user" class="size-6 text-slate-400 dark:text-slate-500"></i>
-                                </div>
-                                <p class="text-sm font-medium text-slate-800 dark:text-white">خوش آمدید</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">وارد شوید یا ثبت‌نام کنید</p>
-                            </div>
-
-                            <hr class="border-slate-200/50 dark:border-slate-800/50">
-
-                            <a href="{% url 'apps.accounts:login' %}" class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl transition-colors text-sm font-medium bg-blue-600 text-white hover:bg-blue-700">
-                                <i data-lucide="log-in" class="size-4"></i> ورود
-                            </a>
-
-                            <a href="{% url 'apps.accounts:register' %}" class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl transition-colors text-sm text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white">
-                                <i data-lucide="user-plus" class="size-4"></i> ثبت‌نام
-                            </a>
-                        {% endif %}
-
-                    </div>
                 </div>
-
             </div>
+
         </div>
     </div>
-
-    <!-- ===== مودال جستجو ===== -->
-    <div x-show="searchModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-[100] flex items-start justify-center p-4 bg-black/40 backdrop-blur-sm" @click.self="searchModal = false" @keydown.escape="searchModal = false" role="dialog" aria-label="جستجو" aria-modal="true">
-        <div x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95 -translate-y-8" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-95 -translate-y-8" class="w-full max-w-2xl mt-16 md:mt-24 rounded-2xl shadow-2xl border p-6 bg-white border-slate-200/50 dark:bg-slate-900 dark:border-slate-800/50">
-            <div class="flex items-center gap-3 pb-4 border-b border-slate-200/50 dark:border-slate-800/50">
-                <i data-lucide="search" class="size-5 text-slate-400"></i>
-                <input type="text" placeholder="جستجوی محصول، برند یا دسته‌بندی..." class="flex-1 text-lg outline-none bg-transparent text-slate-800 placeholder:text-slate-400 dark:text-white dark:placeholder:text-slate-500" x-ref="searchInput" x-init="$nextTick(() => $refs.searchInput.focus())" aria-label="جستجو">
-                <button @click="searchModal = false" class="p-2 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors" aria-label="بستن"><i data-lucide="x" class="size-5"></i></button>
-            </div>
-            <div class="mt-4">
-                <p class="text-sm text-slate-500">جستجوهای محبوب</p>
-                <div class="flex flex-wrap gap-2 mt-3">
-                    <a href="#" class="px-3 py-1.5 text-sm rounded-full border transition-colors border-slate-200 text-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/50">گوشی سامسونگ</a>
-                    <a href="#" class="px-3 py-1.5 text-sm rounded-full border transition-colors border-slate-200 text-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/50">لپ‌تاپ ایسوس</a>
-                    <a href="#" class="px-3 py-1.5 text-sm rounded-full border transition-colors border-slate-200 text-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/50">هدفون بیس</a>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- ===== دراور موبایل ===== -->
-    <div x-show="mobileDrawer" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-[100]" @click.self="mobileDrawer = false" @keydown.escape="mobileDrawer = false">
+    <div x-show="mobileDrawer" x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[100]" @click.self="mobileDrawer = false"
+         @keydown.escape="mobileDrawer = false">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-        <div x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-200 transform" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="absolute top-0 right-0 h-full w-full max-w-sm shadow-2xl flex flex-col bg-white dark:bg-slate-900" role="dialog" aria-label="منو" aria-modal="true">
+        <div x-transition:enter="transition ease-out duration-300 transform"
+             x-transition:enter-start="-translate-x-full"
+             x-transition:enter-end="translate-x-0"
+             x-transition:leave="transition ease-in duration-200 transform"
+             x-transition:leave-start="translate-x-0"
+             x-transition:leave-end="-translate-x-full"
+             class="absolute top-0 right-0 h-full w-full max-w-sm shadow-2xl flex flex-col bg-white dark:bg-slate-900"
+             role="dialog" aria-label="منو" aria-modal="true">
             <div class="flex items-center justify-between p-4 border-b border-slate-200/50 dark:border-slate-800/50">
                 <span class="text-lg font-bold text-slate-800 dark:text-white">نکست‌تک</span>
-                <button @click="mobileDrawer = false" class="p-2 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors" aria-label="بستن"><i data-lucide="x" class="size-5"></i></button>
+                <button @click="mobileDrawer = false"
+                        class="p-2 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
+                        aria-label="بستن"><i data-lucide="x" class="size-5"></i>
+                </button>
             </div>
             <nav class="flex-1 overflow-y-auto p-4 space-y-1">
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"><i data-lucide="home" class="size-4"></i>صفحه اصلی</a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"><i data-lucide="package" class="size-4"></i>محصولات</a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"><i data-lucide="tag" class="size-4"></i>تخفیف‌ها</a>
+                <a href="{% url 'apps.core:home' %}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"><i
+                        data-lucide="home" class="size-4"></i>صفحه اصلی</a>
+                <a href="{% url 'apps.products:product_list' %}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"><i
+                        data-lucide="package" class="size-4"></i>محصولات</a>
+                <a href="{% url 'apps.products:product_list' %}?has_discount=true"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"><i
+                        data-lucide="tag" class="size-4"></i>تخفیف‌ها</a>
                 <hr class="my-4 border-slate-200/50 dark:border-slate-800/50">
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"><i data-lucide="log-in" class="size-4"></i>ورود</a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"><i data-lucide="user-plus" class="size-4"></i>ثبت‌نام</a>
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'apps.dashboard:dashboard' %}"
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"><i
+                            data-lucide="layout-dashboard"
+                            class="size-4"></i>داشبورد</a>
+                    <a href="{% url 'apps.orders:order_list' %}"
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"><i
+                            data-lucide="package" class="size-4"></i>سفارشات</a>
+                    <a href="{% url 'apps.dashboard:wishlist' %}"
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"><i
+                            data-lucide="heart" class="size-4"></i>علاقه‌مندی‌ها</a>
+                    <a href="{% url 'apps.dashboard:profile' %}"
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"><i
+                            data-lucide="user" class="size-4"></i>پروفایل</a>
+                    <hr class="my-4 border-slate-200/50 dark:border-slate-800/50">
+                    <form method="POST" action="{% url 'apps.accounts:logout' %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="flex w-full items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-rose-600 hover:bg-rose-50/50 dark:text-rose-400 dark:hover:bg-rose-950/30">
+                            <i data-lucide="log-out" class="size-4"></i>خروج
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'apps.accounts:login' %}"
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"><i
+                            data-lucide="log-in" class="size-4"></i>ورود</a>
+                    <a href="{% url 'apps.accounts:register' %}"
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50/50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-white"><i
+                            data-lucide="user-plus" class="size-4"></i>ثبت‌نام</a>
+                {% endif %}
             </nav>
             <div class="p-4 border-t border-slate-200/50 dark:border-slate-800/50">
-                <a href="#" class="block w-full text-center py-3.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium">شروع خرید</a>
+                <a href="{% url 'apps.products:product_list' %}"
+                   class="block w-full text-center py-3.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium">شروع
+                    خرید</a>
             </div>
         </div>
     </div>
 </header>
+
+<!-- ===== اسکریپت جستجو ===== -->
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('navbarSearch', () => ({
+            searchQuery: '',
+            searchResults: [],
+            isSearching: false,
+
+            performSearch() {
+                if (this.searchQuery.length < 2) {
+                    this.searchResults = [];
+                    return;
+                }
+
+                this.isSearching = true;
+
+                fetch(`/api/search/?q=${encodeURIComponent(this.searchQuery)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        this.searchResults = data.results;
+                        this.isSearching = false;
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
+                        this.isSearching = false;
+                    });
+            },
+
+            formatPrice(price) {
+                if (!price) return '۰';
+                return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
+        }));
+    });
+</script>

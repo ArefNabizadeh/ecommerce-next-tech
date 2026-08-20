@@ -54,7 +54,7 @@
                              alt="{{ user.get_full_name }}"
                              class="size-full rounded-full object-cover">
                     {% else %}
-                        <span>{{ user.get_full_name|slice:":1"|default:user.username|slice:":1" }}</span>
+                        <span>{{ user.get_full_name|slice:":1"|default:user.username|slice:":1"|upper }}</span>
                     {% endif %}
                 </div>
 
@@ -64,6 +64,7 @@
                     {% csrf_token %}
                     <input type="file" name="avatar" id="avatar-input" accept="image/*"
                            onchange="document.getElementById('avatar-form').submit();">
+                    <input type="hidden" name="update_avatar" value="1">
                 </form>
 
                 <!-- دکمه دوربین -->
@@ -95,7 +96,6 @@
             </div>
 
             <!-- دکمه تغییر رمز -->
-            <!-- templates/dashboard/profile.html -->
             <a href="{% url 'apps.accounts:change_password' %}"
                class="flex-shrink-0 inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:-translate-y-0.5 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                 <i data-lucide="key" class="size-3.5"></i>
@@ -103,7 +103,6 @@
             </a>
         </div>
 
-        <!-- ===== فرم اطلاعات شخصی ===== -->
         <!-- ===== فرم اطلاعات شخصی ===== -->
         <form method="POST" action="{% url 'apps.dashboard:profile' %}"
               enctype="multipart/form-data"
@@ -302,15 +301,15 @@
                         class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 disabled:opacity-70">
                     <span x-show="!loading">ذخیره تغییرات</span>
                     <span x-show="loading" class="flex items-center gap-2">
-                <svg class="size-4 animate-spin" xmlns="http://www.w3.org/2000/svg"
-                     fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                            stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                در حال ذخیره...
-            </span>
+                    <svg class="size-4 animate-spin" xmlns="http://www.w3.org/2000/svg"
+                         fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    در حال ذخیره...
+                </span>
                 </button>
                 <a href="{% url 'apps.dashboard:dashboard' %}"
                    class="rounded-xl border border-slate-300 px-6 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
@@ -359,8 +358,8 @@
             <div class="mt-4 space-y-3">
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-slate-600 dark:text-slate-400">رمز عبور</span>
-                    <a href="#" class="text-sm text-blue-600 hover:underline
-                dark:text-blue-400">
+                    <a href="{% url 'apps.accounts:change_password' %}"
+                       class="text-sm text-blue-600 hover:underline dark:text-blue-400">
                         تغییر رمز
                     </a>
                 </div>

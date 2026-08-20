@@ -5,13 +5,18 @@ from django.db.models import Q, Count, Avg, Case, When, F, DecimalField
 from .models import Product, Category, Brand, Wishlist, Review
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-
-
+from django.http import JsonResponse
+from django.urls import reverse
 def product_list_view(request):
     """صفحه لیست محصولات"""
 
     products = Product.objects.filter(is_active=True).select_related('category',
                                                                      'brand')
+    wishlist_product_ids = []
+    if request.user.is_authenticated:
+        wishlist_product_ids = Wishlist.objects.filter(
+            user=request.user
+        ).values_list('product_id', flat=True)
 
     # ===== جستجو =====
     search_query = request.GET.get('q', '').strip()
@@ -122,6 +127,7 @@ def product_list_view(request):
         'selected_brands': brand_slugs,
         'sort_by': sort_by,
         'query_params': query_params.urlencode(),
+        'wishlist_product_ids': wishlist_product_ids,
     }
 
     return render(request, 'products/product_list.html', context)
@@ -287,3 +293,48 @@ def remove_from_wishlist_view(request, product_id):
         messages.success(request, f'{product.name} از علاقه‌مندی‌ها حذف شد.')
 
     return redirect(request.META.get('HTTP_REFERER', 'apps.products:product_list'))
+
+
+def search_api(request):
+    """API جستجوی محصولات برای نوار ناوبری"""
+    query = request.GET.get('q', '').strip()
+
+    if len(query) < 2:
+        return JsonResponse({'results': []})
+
+    products = Product.objects.filter(
+        Q(name__icontains=query) |
+        Q(description__icontains=query) |
+        Q(category__name__icontains=query) |
+        Q(brand__name__icontains=query),
+        is_active=True
+    ).select_related('category','brand')[:10]
+
+    results = []
+    for product in products:
+        final_price = product.final_price
+        results.append({
+            'id': product.id,
+            'name': product.name,
+            'price': float(final_price),
+            'category': product.category.name if product.category else '',
+            'brand': (
+                product.brand.name
+                if product.brand
+                else ''
+            ),
+            'image': (
+                product.image.url
+                if product.image
+                else None
+            ),
+
+            'url': reverse(
+                'apps.products:product_detail',
+                kwargs={
+                    'slug': product.slug
+                }
+            ),
+        })
+
+    return JsonResponse({'results': results})

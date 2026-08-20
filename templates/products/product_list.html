@@ -88,7 +88,7 @@
                       class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
                     <div class="flex items-center justify-between">
                         <h3 class="text-sm font-bold text-slate-800 dark:text-white">
-                            دسته‌بندی‌ها</h3>
+                            برندها</h3>
                         <a href="{% url 'apps.products:brand_list' %}"
                            class="text-xs text-blue-600 hover:underline dark:text-blue-400">مشاهده
                             همه</a>
@@ -180,7 +180,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-6"
                      data-aos="fade-up" data-aos-delay="100">
                     <div class="flex items-center gap-2">
-                        <span class="text-sm text-slate-500 dark:text-slate-400">{{ paginator.count}} محصول</span>
+                        <span class="text-sm text-slate-500 dark:text-slate-400">{{ paginator.count }} محصول</span>
                         <button class="lg:hidden rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                             <i data-lucide="sliders-horizontal" class="size-5"></i>
                         </button>
@@ -277,18 +277,41 @@
                                             <i data-lucide="eye" class="size-4"></i>
                                         </a>
 
-                                        <!-- ===== ۲. افزودن به علاقه‌مندی‌ها ===== -->
-                                        <form method="POST"
-                                              action="{% url 'apps.products:add_to_wishlist' product.id %}"
-                                              class="inline-block">
-                                            {% csrf_token %}
-                                            <button type="submit"
-                                                    class="rounded-full bg-white p-2.5 text-slate-700 transition-all hover:scale-110 hover:bg-rose-600 hover:text-white"
-                                                    aria-label="افزودن به علاقه‌مندی‌ها">
+                                        <!-- ===== ۲. افزودن به علاقه‌مندی‌ها (با تشخیص وضعیت) ===== -->
+                                        {% if user.is_authenticated %}
+                                            {% if product.id in wishlist_product_ids %}
+                                                <form method="POST"
+                                                      action="{% url 'apps.products:remove_from_wishlist' product.id %}"
+                                                      class="inline-block">
+                                                    {% csrf_token %}
+                                                    <button type="submit"
+                                                            class="rounded-full bg-white p-2.5 text-rose-600 transition-all hover:scale-110 hover:bg-rose-600 hover:text-white"
+                                                            aria-label="حذف از علاقه‌مندی‌ها">
+                                                        <i data-lucide="heart"
+                                                           class="size-4 fill-rose-600"></i>
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <form method="POST"
+                                                      action="{% url 'apps.products:add_to_wishlist' product.id %}"
+                                                      class="inline-block">
+                                                    {% csrf_token %}
+                                                    <button type="submit"
+                                                            class="rounded-full bg-white p-2.5 text-slate-700 transition-all hover:scale-110 hover:bg-rose-600 hover:text-white"
+                                                            aria-label="افزودن به علاقه‌مندی‌ها">
+                                                        <i data-lucide="heart"
+                                                           class="size-4"></i>
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        {% else %}
+                                            <a href="{% url 'apps.accounts:login' %}?next={{ request.path }}"
+                                               class="rounded-full bg-white p-2.5 text-slate-700 transition-all hover:scale-110 hover:bg-rose-600 hover:text-white"
+                                               aria-label="افزودن به علاقه‌مندی‌ها">
                                                 <i data-lucide="heart"
                                                    class="size-4"></i>
-                                            </button>
-                                        </form>
+                                            </a>
+                                        {% endif %}
 
                                         <!-- ===== ۳. مقایسه (placeholder) ===== -->
                                         <button class="rounded-full bg-white p-2.5 text-slate-700 transition-all hover:scale-110 hover:bg-blue-600 hover:text-white"
