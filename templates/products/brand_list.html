@@ -1,0 +1,270 @@
+<!-- templates/products/brand-list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}برندها | نکست‌تک{% endblock %}
+
+{% block content %}
+
+    <!-- ===== هدر صفحه ===== -->
+    <section
+            class="relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-700 py-12 md:py-16"
+            data-aos="fade-down">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute -top-20 -right-20 size-64 rounded-full bg-white/10 blur-3xl"></div>
+            <div class="absolute -bottom-20 -left-20 size-64 rounded-full bg-white/10 blur-3xl"></div>
+        </div>
+        <div class="container max-w-7xl mx-auto px-4 sm:px-6 relative">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <nav class="flex items-center gap-2 text-sm text-blue-200">
+                        <a href="{% url 'apps.core:home' %}"
+                           class="hover:text-white transition-colors">خانه</a>
+                        <i data-lucide="chevron-left" class="size-3.5"></i>
+                        <span class="text-white font-medium">برندها</span>
+                    </nav>
+                    <h1 class="mt-2 text-2xl md:text-3xl font-bold text-white">
+                        برندها</h1>
+                    <p class="mt-1 text-sm text-blue-200">{{ brands|length }} برند</p>
+                </div>
+                <div class="flex items-center gap-3">
+                <span class="rounded-full bg-white/20 px-4 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
+                    برندهای معتبر
+                </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== محتوای اصلی ===== -->
+    <div class="container max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+
+        <!-- ===== جستجو ===== -->
+        <form method="GET" action="{% url 'apps.products:brand_list' %}"
+              class="max-w-md mx-auto mb-10" data-aos="fade-up">
+            <div class="relative">
+                <input type="text" name="q" placeholder="جستجوی برند..."
+                       value="{{ search_query|default:'' }}"
+                       class="w-full rounded-2xl border bg-white/50 px-5 py-3 pr-12 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500">
+                <button type="submit"
+                        class="absolute inset-y-0 right-0 flex items-center pl-4 pointer-events-none">
+                    <i data-lucide="search" class="size-5 text-slate-400"></i>
+                </button>
+            </div>
+        </form>
+
+        <!-- ===== برندهای ویژه ===== -->
+        {% if featured_brands %}
+            <div class="mb-12" data-aos="fade-up" data-aos-delay="50">
+                <h2 class="text-xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
+                    <i data-lucide="sparkles" class="size-5 text-amber-500"></i>
+                    برندهای ویژه
+                </h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {% for brand in featured_brands|slice:":5" %}
+                        <a href="{% url 'apps.products:product_list' %}?brand={{ brand.slug }}"
+                           class="group rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100/50 border border-amber-200/50 p-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:from-amber-950/30 dark:to-amber-900/20 dark:border-amber-800/30">
+                            <div class="size-16 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center mx-auto shadow-md group-hover:scale-110 transition-transform">
+                                {% if brand.logo %}
+                                    <img src="{{ brand.logo.url }}"
+                                         alt="{{ brand.name }}"
+                                         class="size-10 object-contain">
+                                {% else %}
+                                    <i data-lucide="building"
+                                       class="size-8 text-amber-500"></i>
+                                {% endif %}
+                            </div>
+                            <h3 class="mt-3 text-sm font-semibold text-slate-800 dark:text-white">{{ brand.name }}</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">{{ brand.products_count|default:0 }}
+                                محصول</p>
+                            <span class="mt-2 inline-block text-xs text-amber-600 hover:underline dark:text-amber-400">
+                    مشاهده محصولات
+                </span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- ===== برندهای محبوب ===== -->
+        {% if popular_brands %}
+            <div class="mb-12" data-aos="fade-up" data-aos-delay="100">
+                <h2 class="text-xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
+                    <i data-lucide="trending-up" class="size-5 text-rose-500"></i>
+                    برندهای محبوب
+                </h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {% for brand in popular_brands|slice:":6" %}
+                        <a href="{% url 'apps.products:product_list' %}?brand={{ brand.slug }}"
+                           class="group rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 text-center shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                            <div class="size-14 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                                {% if brand.logo %}
+                                    <img src="{{ brand.logo.url }}"
+                                         alt="{{ brand.name }}"
+                                         class="size-8 object-contain">
+                                {% else %}
+                                    <i data-lucide="building"
+                                       class="size-6 text-slate-400"></i>
+                                {% endif %}
+                            </div>
+                            <h3 class="mt-2 text-xs font-medium text-slate-800 dark:text-white">{{ brand.name }}</h3>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400">{{ brand.products_count|default:0 }}
+                                محصول</p>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- ===== فیلتر الفبا ===== -->
+        <form method="GET" action="{% url 'apps.products:brand_list' %}"
+              class="flex flex-wrap items-center gap-1.5 mb-8 p-3 rounded-2xl bg-white/50 backdrop-blur-sm border border-slate-200/50 dark:bg-slate-900/50 dark:border-slate-800/50"
+              data-aos="fade-up" data-aos-delay="150">
+            <span class="text-xs font-medium text-slate-500 dark:text-slate-400 ml-2">فیلتر:</span>
+            <button type="submit" name="letter" value=""
+                    class="rounded-lg px-3 py-1.5 text-xs font-medium text-white bg-blue-600 transition-all hover:bg-blue-700">
+                همه
+            </button>
+            <button type="submit" name="letter" value="الف"
+                    class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+                الف
+            </button>
+            <button type="submit" name="letter" value="ب"
+                    class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+                ب
+            </button>
+            <button type="submit" name="letter" value="پ"
+                    class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+                پ
+            </button>
+            <button type="submit" name="letter" value="ت"
+                    class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+                ت
+            </button>
+            <button type="submit" name="letter" value="س"
+                    class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+                س
+            </button>
+            <button type="submit" name="letter" value="ش"
+                    class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+                ش
+            </button>
+            <button type="submit" name="letter" value="ع"
+                    class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+                ع
+            </button>
+            <button type="submit" name="letter" value="ک"
+                    class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+                ک
+            </button>
+            <button type="submit" name="letter" value="م"
+                    class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+                م
+            </button>
+            <button type="submit" name="letter" value="ن"
+                    class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+                ن
+            </button>
+            <button type="submit" name="letter" value="و"
+                    class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+                و
+            </button>
+            <button type="submit" name="letter" value="ی"
+                    class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+                ی
+            </button>
+        </form>
+
+        <!-- ===== لیست برندها ===== -->
+        {% if brands %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"
+                 data-aos="fade-up" data-aos-delay="200">
+
+                {% for brand in brands %}
+                    <div class="group rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-blue-400 dark:bg-slate-900/80 dark:border-slate-800/50 dark:hover:border-blue-600/50">
+
+                        <div class="flex items-start gap-4">
+                            <!-- لوگو -->
+                            <div class="flex-shrink-0 size-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:scale-105 transition-transform">
+                                {% if brand.logo %}
+                                    <img src="{{ brand.logo.url }}"
+                                         alt="{{ brand.name }}"
+                                         class="size-12 object-contain">
+                                {% else %}
+                                    <i data-lucide="building-2"
+                                       class="size-8 text-slate-400"></i>
+                                {% endif %}
+                            </div>
+
+                            <!-- اطلاعات -->
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-base font-bold text-slate-800 dark:text-white">{{ brand.name }}</h3>
+                                <div class="flex flex-wrap items-center gap-2 mt-0.5">
+                                    {% if brand.country %}
+                                        <span class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                    <i data-lucide="map-pin" class="size-3"></i>
+                                    {{ brand.country }}
+                                </span>
+                                    {% endif %}
+                                    <span class="text-xs text-slate-500 dark:text-slate-400">
+                                {{ brand.products_count|default:0 }} محصول
+                            </span>
+                                </div>
+                                {% if brand.description %}
+                                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400 line-clamp-2">{{ brand.description }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- دکمه -->
+                        <div class="mt-4 pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
+                            <a href="{% url 'apps.products:product_list' %}?brand={{ brand.slug }}"
+                               class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 transition-all hover:gap-3 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
+                                مشاهده محصولات
+                                <i data-lucide="arrow-left"
+                                   class="size-4 transition-transform group-hover:translate-x-0.5"></i>
+                            </a>
+                        </div>
+
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <!-- ===== صفحه‌بندی ===== -->
+            {% if is_paginated %}
+                <div class="mt-8" data-aos="fade-up" data-aos-delay="250">
+                    {% include 'components/pagination.html' with page_obj=page_obj query_params=query_params %}
+                </div>
+            {% endif %}
+
+        {% else %}
+            <!-- ===== حالت خالی ===== -->
+            <div class="flex flex-col items-center justify-center rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-12 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50 text-center">
+                <div class="size-24 rounded-full bg-slate-100 flex items-center justify-center dark:bg-slate-800">
+                    <i data-lucide="building" class="size-12 text-slate-400"></i>
+                </div>
+                <h3 class="mt-4 text-xl font-bold text-slate-800 dark:text-white">برندی
+                    یافت نشد</h3>
+                <p class="mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
+                    با فیلترهای مختلف جستجو کنید یا برند دیگری را امتحان کنید.
+                </p>
+                <a href="{% url 'apps.products:brand_list' %}"
+                   class="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40">
+                    <i data-lucide="refresh" class="size-4"></i>
+                    حذف فیلترها
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+{% endblock %}

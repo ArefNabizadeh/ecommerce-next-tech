@@ -1,0 +1,497 @@
+<!-- templates/blog/blog-detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ article.title }} | نکست‌تک{% endblock %}
+
+{% block meta_description %}
+    {{ article.excerpt|default:article.content|striptags|truncatechars:160 }}{% endblock %}
+
+{% block content %}
+
+    <!-- ======================================== -->
+    <!-- ===== HERO SECTION ===== -->
+    <!-- ======================================== -->
+    <section
+            class="relative overflow-hidden min-h-[60vh] md:min-h-[70vh] flex items-end"
+            data-aos="fade-down">
+        <!-- تصویر پس‌زمینه -->
+        <div class="absolute inset-0">
+            {% if article.image %}
+                <img src="{{ article.image.url }}" alt="{{ article.title }}"
+                     class="size-full object-cover">
+            {% else %}
+                <div class="size-full bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600"></div>
+            {% endif %}
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/50 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-slate-950/20"></div>
+        </div>
+
+        <!-- محتوا -->
+        <div class="container max-w-7xl mx-auto px-4 sm:px-6 relative pb-12 md:pb-16">
+            <div class="max-w-4xl">
+                <div class="flex flex-wrap items-center gap-2 mb-4">
+                <span class="rounded-full bg-blue-600 px-3 py-1 text-xs font-medium text-white">
+                    {{ article.category.name|default:"عمومی" }}
+                </span>
+                    {% if article.is_featured %}
+                        <span class="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-white">
+                        ویژه
+                    </span>
+                    {% endif %}
+                </div>
+
+                <h1 class="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight mb-4">
+                    {{ article.title }}
+                </h1>
+
+                <div class="flex flex-wrap items-center gap-4 text-sm text-gray-300">
+                    <div class="flex items-center gap-2">
+                        <div class="size-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-xs font-bold text-white">
+                            {{ article.author.get_full_name|default:article.author.username|slice:":1"|upper }}
+                        </div>
+                        <span>{{ article.author.get_full_name|default:article.author.username }}</span>
+                    </div>
+                    <span>•</span>
+                    <span class="flex items-center gap-1"><i data-lucide="calendar"
+                                                             class="size-3.5"></i> {{ article.published_at|date:"Y/m/d" }}</span>
+                    <span>•</span>
+                    <span class="flex items-center gap-1"><i data-lucide="clock"
+                                                             class="size-3.5"></i> {{ article.reading_time|default:"۳" }} دقیقه مطالعه</span>
+                    <span>•</span>
+                    <span class="flex items-center gap-1"><i data-lucide="eye"
+                                                             class="size-3.5"></i> {{ article.views|default:0 }} بازدید</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================== -->
+    <!-- ===== MAIN CONTENT ===== -->
+    <!-- ======================================== -->
+    <div class="container max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-16">
+
+        <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
+
+            <!-- ===== ARTICLE CONTENT ===== -->
+            <div class="flex-1 min-w-0" data-aos="fade-up">
+
+                <article
+                        class="prose prose-lg prose-slate dark:prose-invert max-w-none">
+
+                    <!-- خلاصه/مقدمه -->
+                    <div class="text-xl text-slate-700 dark:text-slate-300 border-r-4 border-blue-600 pr-6 py-2 mb-8">
+                        {{ article.excerpt|default:article.content|striptags|truncatechars:200 }}
+                    </div>
+
+                    <!-- محتوای اصلی -->
+                    {{ article.content|safe }}
+
+                </article>
+
+                <!-- ===== برچسب‌ها ===== -->
+                {% if article.tags.all %}
+                    <div class="mt-10 pt-6 border-t border-slate-200/50 dark:border-slate-700/50">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-sm font-medium text-slate-600 dark:text-slate-400 ml-2">برچسب‌ها:</span>
+                            {% for tag in article.tags.all %}
+                                <a href="#"
+                                   class="rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs text-slate-600 dark:text-slate-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                    #{{ tag.name }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- ===== نویسنده ===== -->
+                <div class="mt-10 rounded-3xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 p-6 shadow-lg">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                        <div class="size-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-2xl font-bold text-white flex-shrink-0">
+                            {{ article.author.get_full_name|default:article.author.username|slice:":1"|upper }}
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-bold text-slate-800 dark:text-white">{{ article.author.get_full_name|default:article.author.username }}</h4>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">
+                                نویسنده و تولیدکننده محتوا در نکست‌تک</p>
+                        </div>
+                        <a href="#"
+                           class="inline-flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <i data-lucide="user" class="size-4"></i>
+                            مشاهده پروفایل
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ===== مقالات قبلی و بعدی ===== -->
+                <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {% if prev_article %}
+                        <a href="{% url 'apps.blog:blog_detail' prev_article.slug %}"
+                           class="group rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 p-5 shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl">
+                            <span class="text-xs text-slate-500 dark:text-slate-400">قبلی</span>
+                            <p class="text-sm font-semibold text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">{{ prev_article.title }}</p>
+                        </a>
+                    {% endif %}
+                    {% if next_article %}
+                        <a href="{% url 'blog:blog_detail' next_article.slug %}"
+                           class="group rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 p-5 shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl text-left">
+                            <span class="text-xs text-slate-500 dark:text-slate-400">بعدی</span>
+                            <p class="text-sm font-semibold text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">{{ next_article.title }}</p>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- ===== FLOATING SIDEBAR ===== -->
+            <aside class="lg:w-72 flex-shrink-0 order-first lg:order-last"
+                   data-aos="fade-left" data-aos-delay="100">
+                <div class="sticky top-24 space-y-6">
+
+                    <!-- ===== فهرست مطالب ===== -->
+                    <div class="rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 p-5 shadow-lg">
+                        <h4 class="text-sm font-bold text-slate-800 dark:text-white mb-3 flex items-center gap-2">
+                            <i data-lucide="list" class="size-4 text-blue-600"></i>
+                            فهرست مطالب
+                        </h4>
+                        <ul class="space-y-2 text-sm" id="toc">
+                            <li><a href="#section-1"
+                                   class="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">مقدمه</a>
+                            </li>
+                            <li><a href="#section-2"
+                                   class="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">بخش
+                                اول</a></li>
+                            <li><a href="#section-3"
+                                   class="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">بخش
+                                دوم</a></li>
+                            <li><a href="#section-4"
+                                   class="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">نتیجه‌گیری</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- ===== اشتراک‌گذاری ===== -->
+                    <div class="rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 p-5 shadow-lg">
+                        <h4 class="text-sm font-bold text-slate-800 dark:text-white mb-3 flex items-center gap-2">
+                            <i data-lucide="share-2" class="size-4 text-blue-600"></i>
+                            اشتراک‌گذاری
+                        </h4>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="rounded-lg bg-slate-100 dark:bg-slate-800 p-2.5 text-slate-600 dark:text-slate-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                    aria-label="اشتراک در تلگرام">
+                                <i data-lucide="send" class="size-4"></i>
+                            </button>
+                            <button class="rounded-lg bg-slate-100 dark:bg-slate-800 p-2.5 text-slate-600 dark:text-slate-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                    aria-label="اشتراک در توییتر">
+                                <i data-lucide="twitter" class="size-4"></i>
+                            </button>
+                            <button class="rounded-lg bg-slate-100 dark:bg-slate-800 p-2.5 text-slate-600 dark:text-slate-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                    aria-label="اشتراک در لینکدین">
+                                <i data-lucide="linkedin" class="size-4"></i>
+                            </button>
+                            <button class="rounded-lg bg-slate-100 dark:bg-slate-800 p-2.5 text-slate-600 dark:text-slate-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                    aria-label="کپی لینک">
+                                <i data-lucide="link" class="size-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ===== نوار پیشرفت مطالعه ===== -->
+                    <div class="rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 p-5 shadow-lg">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-slate-600 dark:text-slate-400">پیشرفت مطالعه</span>
+                            <span class="font-bold text-blue-600 dark:text-blue-400"
+                                  id="reading-progress-text">۰%</span>
+                        </div>
+                        <div class="mt-2 h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                            <div class="h-full rounded-full bg-blue-600 transition-all duration-300"
+                                 id="reading-progress-bar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </aside>
+        </div>
+
+        <!-- ===== مقالات مرتبط ===== -->
+        {% if related_articles %}
+            <div class="mt-16" data-aos="fade-up">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-white">مقالات
+                        مرتبط</h3>
+                    <a href="{% url 'apps.blog:blog_list' %}" class="text-sm
+                    text-blue-600
+            hover:underline dark:text-blue-400">مشاهده همه</a>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    {% for related in related_articles|slice:":3" %}
+                        <div class="group rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 overflow-hidden shadow-lg transition-all hover:-translate-y-2 hover:shadow-2xl">
+                            <div class="relative h-40 overflow-hidden bg-slate-200 dark:bg-slate-700">
+                                {% if related.image %}
+                                    <img src="{{ related.image.url }}"
+                                         alt="{{ related.title }}"
+                                         class="size-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                {% else %}
+                                    <div class="size-full flex items-center justify-center text-3xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                                        📄
+                                    </div>
+                                {% endif %}
+                                <span class="absolute top-2 right-2 rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-medium text-white">{{ related.category.name|default:"عمومی" }}</span>
+                            </div>
+                            <div class="p-4">
+                                <h4 class="text-sm font-bold text-slate-800 dark:text-white line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                    <a href="
+{% url 'apps.blog:blog_detail' related.slug %}">{{ related.title }}</a>
+                                </h4>
+                                <div class="mt-2 flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                                    <span class="flex items-center gap-1"><i
+                                            data-lucide="clock"
+                                            class="size-3"></i> {{ related.reading_time|default:"۳" }} دقیقه</span>
+                                    <span class="flex items-center gap-1"><i
+                                            data-lucide="calendar"
+                                            class="size-3"></i> {{ related.published_at|date:"Y/m/d" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+
+    <!-- ======================================== -->
+    <!-- ===== READING PROGRESS SCRIPT ===== -->
+    <!-- ======================================== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            // ===== Reading Progress =====
+            const progressBar = document.getElementById('reading-progress-bar');
+            const progressText = document.getElementById('reading-progress-text');
+
+            if (progressBar && progressText) {
+                window.addEventListener('scroll', () => {
+                    const scrollTop = window.scrollY;
+                    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                    const progress = (scrollTop / docHeight) * 100;
+                    progressBar.style.width = Math.min(100, progress) + '%';
+                    progressText.textContent = Math.round(Math.min(100, progress)) + '%';
+                });
+            }
+        });
+    </script>
+
+    <!-- ===== استایل‌های محتوای مقاله ===== -->
+    <style>
+        /* ============================================
+           ARTICLE CONTENT STYLES
+           ============================================ */
+
+        .prose {
+            color: var(--tw-prose-body);
+            max-width: 65ch;
+        }
+
+        .prose h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            scroll-margin-top: 5rem;
+            color: #1e293b;
+        }
+
+        .dark .prose h2 {
+            color: #f1f5f9;
+        }
+
+        .prose h3 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            scroll-margin-top: 5rem;
+            color: #1e293b;
+        }
+
+        .dark .prose h3 {
+            color: #f1f5f9;
+        }
+
+        .prose p {
+            margin-bottom: 1.25rem;
+            line-height: 1.8;
+            color: #334155;
+        }
+
+        .dark .prose p {
+            color: #cbd5e1;
+        }
+
+        .prose ul, .prose ol {
+            margin: 1rem 0;
+            padding-right: 1.5rem;
+        }
+
+        .prose li {
+            margin-bottom: 0.5rem;
+            color: #334155;
+        }
+
+        .dark .prose li {
+            color: #cbd5e1;
+        }
+
+        .prose blockquote {
+            border-right: 4px solid #2563eb;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            background: rgba(37, 99, 235, 0.05);
+            border-radius: 0 12px 12px 0;
+            color: #1e293b;
+        }
+
+        .dark .prose blockquote {
+            background: rgba(37, 99, 235, 0.1);
+            color: #e2e8f0;
+        }
+
+        .prose blockquote p:last-child {
+            margin-bottom: 0;
+        }
+
+        .prose img {
+            border-radius: 16px;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .prose img {
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .prose pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 16px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        .prose code {
+            font-size: 0.875rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .prose table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .prose table th {
+            background: #f1f5f9;
+            padding: 0.75rem 1rem;
+            text-align: right;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .dark .prose table th {
+            background: #1e293b;
+            color: #f1f5f9;
+        }
+
+        .prose table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+        }
+
+        .dark .prose table td {
+            border-bottom: 1px solid #334155;
+            color: #cbd5e1;
+        }
+
+        .prose .highlight-box {
+            background: rgba(37, 99, 235, 0.08);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            padding: 1.25rem;
+            border-radius: 16px;
+            margin: 1.5rem 0;
+            color: #1e293b;
+        }
+
+        .dark .prose .highlight-box {
+            background: rgba(37, 99, 235, 0.1);
+            border-color: rgba(37, 99, 235, 0.3);
+            color: #e2e8f0;
+        }
+
+        .prose .highlight-box strong {
+            color: #2563eb;
+        }
+
+        .dark .prose .highlight-box strong {
+            color: #60a5fa;
+        }
+
+        @media (max-width: 640px) {
+            .prose h2 {
+                font-size: 1.4rem;
+            }
+
+            .prose h3 {
+                font-size: 1.15rem;
+            }
+
+            .prose p {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // ===== Active TOC Highlight =====
+            const tocLinks = document.querySelectorAll('#toc a');
+            const headings = document.querySelectorAll('article h2, article h3');
+
+            if (tocLinks.length && headings.length) {
+                window.addEventListener('scroll', () => {
+                    let current = '';
+                    headings.forEach(heading => {
+                        const rect = heading.getBoundingClientRect();
+                        if (rect.top <= 100) {
+                            current = heading.id;
+                        }
+                    });
+
+                    tocLinks.forEach(link => {
+                        link.classList.remove('text-blue-600', 'dark:text-blue-400', 'font-medium');
+                        if (link.getAttribute('href') === '#' + current) {
+                            link.classList.add('text-blue-600', 'dark:text-blue-400', 'font-medium');
+                        }
+                    });
+                });
+            }
+
+            // ===== Smooth Scroll for TOC =====
+            document.querySelectorAll('#toc a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = document.querySelector(link.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({behavior: 'smooth'});
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

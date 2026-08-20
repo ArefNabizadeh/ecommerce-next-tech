@@ -1,0 +1,196 @@
+<!-- templates/components/messages.html -->
+{% load static %}
+
+{% if messages %}
+    <div
+            x-data="messagesComponent()"
+            x-init="init()"
+            x-show="messages.length > 0"
+            class="fixed top-20 left-1/2 -translate-x-1/2 z-[999] w-full max-w-2xl px-4 sm:px-6 pointer-events-none"
+            role="alert"
+            aria-live="polite"
+    >
+        <template x-for="(message, index) in messages" :key="index">
+            <div
+                    x-show="message.visible"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 -translate-y-4 scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                    x-transition:leave-end="opacity-0 -translate-y-4 scale-95"
+                    class="relative mb-3 pointer-events-auto rounded-2xl border backdrop-blur-xl shadow-xl overflow-hidden"
+                    :class="{
+                'bg-emerald-50/90 dark:bg-emerald-950/80 border-emerald-200 dark:border-emerald-800/50': message.type === 'success',
+                'bg-rose-50/90 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800/50': message.type === 'error',
+                'bg-amber-50/90 dark:bg-amber-950/80 border-amber-200 dark:border-amber-800/50': message.type === 'warning',
+                'bg-blue-50/90 dark:bg-blue-950/80 border-blue-200 dark:border-blue-800/50': message.type === 'info',
+                'bg-slate-50/90 dark:bg-slate-900/80 border-slate-200 dark:border-slate-700/50': message.type === 'primary'
+            }"
+                    @mouseenter="pauseTimer(index)"
+                    @mouseleave="resumeTimer(index)"
+                    role="alert"
+            >
+                <!-- نوار پیشرفت -->
+                <div
+                        class="absolute bottom-0 right-0 h-1 rounded-b-2xl transition-all duration-100"
+                        :style="{ width: message.progress + '%' }"
+                        :class="{
+                    'bg-emerald-500': message.type === 'success',
+                    'bg-rose-500': message.type === 'error',
+                    'bg-amber-500': message.type === 'warning',
+                    'bg-blue-500': message.type === 'info',
+                    'bg-slate-500': message.type === 'primary'
+                }"
+                ></div>
+
+                <!-- محتوای پیام -->
+                <div class="flex items-start gap-3 p-4">
+                    <div class="flex-shrink-0 mt-0.5">
+                        <template x-if="message.type === 'success'">
+                            <i data-lucide="check-circle"
+                               class="size-5 text-emerald-600 dark:text-emerald-400"></i>
+                        </template>
+                        <template x-if="message.type === 'error'">
+                            <i data-lucide="x-circle"
+                               class="size-5 text-rose-600 dark:text-rose-400"></i>
+                        </template>
+                        <template x-if="message.type === 'warning'">
+                            <i data-lucide="triangle-alert"
+                               class="size-5 text-amber-600 dark:text-amber-400"></i>
+                        </template>
+                        <template x-if="message.type === 'info'">
+                            <i data-lucide="info"
+                               class="size-5 text-blue-600 dark:text-blue-400"></i>
+                        </template>
+                        <template x-if="message.type === 'primary'">
+                            <i data-lucide="bell"
+                               class="size-5 text-slate-600 dark:text-slate-400"></i>
+                        </template>
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium"
+                           :class="{
+                           'text-emerald-800 dark:text-emerald-200': message.type === 'success',
+                           'text-rose-800 dark:text-rose-200': message.type === 'error',
+                           'text-amber-800 dark:text-amber-200': message.type === 'warning',
+                           'text-blue-800 dark:text-blue-200': message.type === 'info',
+                           'text-slate-800 dark:text-slate-200': message.type === 'primary'
+                       }"
+                           x-text="message.text"
+                        ></p>
+                    </div>
+
+                    <button
+                            @click="removeMessage(index)"
+                            class="flex-shrink-0 rounded-lg p-1 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                            aria-label="بستن پیام"
+                    >
+                        <i data-lucide="x" class="size-4"
+                           :class="{
+                           'text-emerald-600 dark:text-emerald-400': message.type === 'success',
+                           'text-rose-600 dark:text-rose-400': message.type === 'error',
+                           'text-amber-600 dark:text-amber-400': message.type === 'warning',
+                           'text-blue-600 dark:text-blue-400': message.type === 'info',
+                           'text-slate-600 dark:text-slate-400': message.type === 'primary'
+                       }"
+                        ></i>
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('messagesComponent', () => ({
+                messages: [],
+                timers: [],
+                defaultDuration: 5000,
+                isInitialized: false,
+
+                init() {
+                    // جلوگیری از دو بار اجرا
+                    if (this.isInitialized) return;
+                    this.isInitialized = true;
+
+                    // دریافت پیام‌ها از Django Messages Framework
+                    {% if messages %}
+                        {% for message in messages %}
+                            this.messages.push({
+                                id: Date.now() + Math.random(),
+                                type: '{{ message.tags }}',
+                                text: '{{ message|escapejs }}',
+                                visible: true,
+                                progress: 100,
+                                timer: null,
+                                paused: false
+                            });
+                        {% endfor %}
+                    {% endif %}
+
+                    // راه‌اندازی تایمر برای هر پیام
+                    this.messages.forEach((msg, index) => {
+                        this.startTimer(index);
+                    });
+                },
+
+                startTimer(index) {
+                    if (this.messages[index].timer) {
+                        clearInterval(this.messages[index].timer);
+                    }
+
+                    let progress = 100;
+                    const step = 100 / (this.defaultDuration / 100);
+
+                    this.messages[index].timer = setInterval(() => {
+                        if (!this.messages[index].paused) {
+                            progress -= step;
+                            this.messages[index].progress = Math.max(0, progress);
+
+                            if (progress <= 0) {
+                                this.removeMessage(index);
+                            }
+                        }
+                    }, 100);
+                },
+
+                pauseTimer(index) {
+                    this.messages[index].paused = true;
+                },
+
+                resumeTimer(index) {
+                    this.messages[index].paused = false;
+                },
+
+                removeMessage(index) {
+                    this.messages[index].visible = false;
+
+                    if (this.messages[index].timer) {
+                        clearInterval(this.messages[index].timer);
+                    }
+
+                    setTimeout(() => {
+                        this.messages.splice(index, 1);
+                    }, 300);
+                },
+
+                addMessage(type, text) {
+                    const index = this.messages.length;
+                    this.messages.push({
+                        id: Date.now() + Math.random(),
+                        type: type,
+                        text: text,
+                        visible: true,
+                        progress: 100,
+                        timer: null,
+                        paused: false
+                    });
+
+                    this.startTimer(index);
+                }
+            }));
+        });
+    </script>
+{% endif %}

@@ -1,0 +1,473 @@
+<!-- templates/accounts/register.html -->
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>ثبت‌نام | نکست‌تک</title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="{% static 'css/output.css' %}"/>
+
+    <!-- Custom CSS (کرسر) -->
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}"/>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Alpine.js -->
+    <script defer
+            src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script>
+        (function () {
+            const saved = localStorage.getItem('theme');
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (saved === 'dark' || (!saved && systemDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-100">
+
+<!-- ===== کرسر سفارشی ===== -->
+<div class="cursor-dot"></div>
+<div class="cursor-ring"></div>
+<div class="scroll-progress"></div>
+
+<!-- ===== پس‌زمینه ===== -->
+<div class="fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950"></div>
+    <div class="absolute top-[-30%] right-[-20%] size-[800px] rounded-full bg-emerald-400/10 blur-3xl animate-float"></div>
+    <div class="absolute bottom-[-30%] left-[-20%] size-[700px] rounded-full bg-cyan-400/10 blur-3xl animate-float-delay"></div>
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:60px_60px]"></div>
+</div>
+
+<!-- ===== محتوای اصلی ===== -->
+<div class="container max-w-7xl mx-auto px-4 sm:px-6 min-h-screen flex items-center justify-center py-12">
+    <div class="w-full max-w-lg" data-aos="fade-up">
+
+        <!-- ===== کارت ثبت‌نام ===== -->
+        <div class="relative rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 md:p-8 shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50 transition-colors duration-300">
+
+            <!-- ===== هدر ===== -->
+            <div class="text-center">
+                <div class="flex justify-center mb-4">
+                    <a href="/" class="flex items-center gap-2.5">
+                        <div class="relative size-12">
+                            <svg viewBox="0 0 40 40" class="size-full">
+                                <rect x="2" y="2" width="36" height="36" rx="10"
+                                      fill="#2563EB"/>
+                                <path d="M12 28L20 12L28 28" stroke="white"
+                                      stroke-width="3" stroke-linecap="round"
+                                      stroke-linejoin="round" fill="none"/>
+                                <circle cx="20" cy="20" r="16" stroke="white"
+                                        stroke-width="1.5" fill="none" opacity="0.3"/>
+                                <path d="M14 22L20 16L26 22" stroke="white"
+                                      stroke-width="2" stroke-linecap="round"
+                                      stroke-linejoin="round" fill="none"
+                                      opacity="0.5"/>
+                            </svg>
+                        </div>
+                        <span class="text-2xl font-bold text-slate-800 dark:text-white">نکست‌تک</span>
+                    </a>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-white">ایجاد حساب
+                    کاربری</h1>
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">به خانواده
+                    بزرگ نکست‌تک خوش آمدید</p>
+            </div>
+
+            <!-- ===== پیام‌های سیستم ===== -->
+
+            {% include 'partials/messages.html' %}
+            <!-- ===== فرم ثبت‌نام ===== -->
+            <form method="POST" action="{% url 'apps.accounts:register' %}"
+                  class="mt-6 space-y-4" novalidate>
+                {% csrf_token %}
+
+                <!-- ===== ردیف: نام و نام خانوادگی ===== -->
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- نام -->
+                    <div x-data="{ focused: false }">
+                        <label for="id_first_name"
+                               class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">نام</label>
+                        <div class="relative">
+                            <input type="text" name="first_name" id="id_first_name"
+                                   class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+                                   :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+                                   @focus="focused = true" @blur="focused = false"
+                                   placeholder="نام"
+                                   value="{{ form.first_name.value|default:'' }}">
+                            <div class="absolute inset-y-0 right-1 flex
+                                items-center pl-2.5 pointer-events-none">
+                                <i data-lucide="user"
+                                   class="size-3.5 text-slate-400"></i>
+                            </div>
+                        </div>
+                        {% if form.first_name.errors %}
+                            <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ form.first_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- نام خانوادگی -->
+                    <div x-data="{ focused: false }">
+                        <label for="id_last_name"
+                               class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">نام
+                            خانوادگی</label>
+                        <div class="relative">
+                            <input type="text" name="last_name" id="id_last_name"
+                                   class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+                                   :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+                                   @focus="focused = true" @blur="focused = false"
+                                   placeholder="نام خانوادگی"
+                                   value="{{ form.last_name.value|default:'' }}">
+                            <div class="absolute inset-y-0 right-1 flex
+                                items-center pl-2.5 pointer-events-none">
+                                <i data-lucide="user"
+                                   class="size-3.5 text-slate-400"></i>
+                            </div>
+                        </div>
+                        {% if form.last_name.errors %}
+                            <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ form.last_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- ===== نام کاربری ===== -->
+                <div x-data="{ focused: false }">
+                    <label for="id_username"
+                           class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">نام
+                        کاربری</label>
+                    <div class="relative">
+                        <input type="text" name="username" id="id_username"
+                               class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+                               :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+                               @focus="focused = true" @blur="focused = false"
+                               placeholder="نام کاربری خود را وارد کنید"
+                               value="{{ form.username.value|default:'' }}" required>
+                        <div class="absolute inset-y-0 right-1 flex items-center
+                            pl-2.5 pointer-events-none">
+                            <i data-lucide="user" class="size-3.5 text-slate-400"></i>
+                        </div>
+                    </div>
+                    {% if form.username.errors %}
+                        <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ form.username.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- ===== ایمیل ===== -->
+                <div x-data="{ focused: false }">
+                    <label for="id_email"
+                           class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">ایمیل</label>
+                    <div class="relative">
+                        <input type="email" name="email" id="id_email"
+                               class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+                               :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+                               @focus="focused = true" @blur="focused = false"
+                               placeholder="ایمیل خود را وارد کنید"
+                               value="{{ form.email.value|default:'' }}" required>
+                        <div class="absolute inset-y-0 right-1 flex items-center
+                            pl-2.5 pointer-events-none">
+                            <i data-lucide="mail" class="size-3.5 text-slate-400"></i>
+                        </div>
+                    </div>
+                    {% if form.email.errors %}
+                        <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ form.email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- ===== شماره تلفن (آیکون در سمت راست) ===== -->
+                <div x-data="{ focused: false }">
+                    <label for="id_phone"
+                           class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">شماره
+                        تلفن</label>
+                    <div class="relative">
+                        <input type="tel" name="phone" id="id_phone"
+                               class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+                               :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+                               @focus="focused = true" @blur="focused = false"
+                               placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+                               value="{{ form.phone.value|default:'' }}">
+                        <div class="absolute inset-y-0 right-1 flex items-center
+                            pl-2.5 pointer-events-none">
+                            <i data-lucide="phone" class="size-3.5 text-slate-400"></i>
+                        </div>
+                    </div>
+                    {% if form.phone.errors %}
+                        <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ form.phone.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- ===== رمز عبور ===== -->
+                <div x-data="{ showPassword: false, focused: false, password: '' }">
+                    <label for="id_password1"
+                           class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">رمز
+                        عبور</label>
+                    <div class="relative">
+                        <input :type="showPassword ? 'text' : 'password'"
+                               name="password1" id="id_password1"
+                               x-model="password"
+                               class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+                               :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+                               @focus="focused = true" @blur="focused = false"
+                               placeholder="رمز عبور خود را وارد کنید" required>
+                        <div class="absolute inset-y-0 right-1 flex items-center
+                            pl-2.5 pointer-events-none">
+                            <i data-lucide="lock" class="size-3.5 text-slate-400"></i>
+                        </div>
+                        <button type="button" @click="showPassword = !showPassword"
+                                class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                                aria-label="نمایش رمز عبور">
+                            <i data-lucide="eye" class="size-3.5"
+                               x-show="!showPassword"></i>
+                            <i data-lucide="eye-off" class="size-3.5"
+                               x-show="showPassword"></i>
+                        </button>
+                    </div>
+
+                    <!-- قدرت رمز عبور -->
+                    <div class="mt-2 space-y-1.5">
+                        <div class="flex items-center gap-2">
+                            <div class="flex-1 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-300"
+                                     :class="{
+                                            'w-0 bg-slate-300 dark:bg-slate-600': password.length === 0,
+                                            'w-1/3 bg-rose-500': password.length > 0 && password.length < 6,
+                                            'w-2/3 bg-amber-500': password.length >= 6 && password.length < 10,
+                                            'w-full bg-emerald-500': password.length >= 10
+                                        }"
+                                ></div>
+                            </div>
+                            <span class="text-xs font-medium whitespace-nowrap"
+                                  :class="{
+                                        'text-slate-400 dark:text-slate-500': password.length === 0,
+                                        'text-rose-500': password.length > 0 && password.length < 6,
+                                        'text-amber-500': password.length >= 6 && password.length < 10,
+                                        'text-emerald-500': password.length >= 10
+                                    }"
+                                  x-text="password.length === 0 ? 'ضعیف' : password.length < 6 ? 'ضعیف' : password.length < 10 ? 'متوسط' : 'قوی'">
+                                </span>
+                        </div>
+                        <div class="flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-slate-500 dark:text-slate-400">
+                                <span :class="password.length >= 8 ? 'text-emerald-500' : ''">
+                                    <i data-lucide="check"
+                                       class="inline-block size-3 ml-0.5"
+                                       x-show="password.length >= 8"></i>
+                                    <i data-lucide="x"
+                                       class="inline-block size-3 ml-0.5"
+                                       x-show="password.length > 0 && password.length < 8"></i>
+                                    حداقل ۸ کاراکتر
+                                </span>
+                            <span :class="/[A-Z]/.test(password) ? 'text-emerald-500' : ''">
+                                    <i data-lucide="check"
+                                       class="inline-block size-3 ml-0.5"
+                                       x-show="/[A-Z]/.test(password)"></i>
+                                    <i data-lucide="x"
+                                       class="inline-block size-3 ml-0.5"
+                                       x-show="password.length > 0 && !/[A-Z]/.test(password)"></i>
+                                    حرف بزرگ
+                                </span>
+                            <span :class="/[a-z]/.test(password) ? 'text-emerald-500' : ''">
+                                    <i data-lucide="check"
+                                       class="inline-block size-3 ml-0.5"
+                                       x-show="/[a-z]/.test(password)"></i>
+                                    <i data-lucide="x"
+                                       class="inline-block size-3 ml-0.5"
+                                       x-show="password.length > 0 && !/[a-z]/.test(password)"></i>
+                                    حرف کوچک
+                                </span>
+                            <span :class="/[0-9]/.test(password) ? 'text-emerald-500' : ''">
+                                    <i data-lucide="check"
+                                       class="inline-block size-3 ml-0.5"
+                                       x-show="/[0-9]/.test(password)"></i>
+                                    <i data-lucide="x"
+                                       class="inline-block size-3 ml-0.5"
+                                       x-show="password.length > 0 && !/[0-9]/.test(password)"></i>
+                                    عدد
+                                </span>
+                            <span :class="/[^A-Za-z0-9]/.test(password) ? 'text-emerald-500' : ''">
+                                    <i data-lucide="check"
+                                       class="inline-block size-3 ml-0.5"
+                                       x-show="/[^A-Za-z0-9]/.test(password)"></i>
+                                    <i data-lucide="x"
+                                       class="inline-block size-3 ml-0.5"
+                                       x-show="password.length > 0 && !/[^A-Za-z0-9]/.test(password)"></i>
+                                    کاراکتر ویژه
+                                </span>
+                        </div>
+                    </div>
+                    {% if form.password1.errors %}
+                        <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ form.password1.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- ===== تکرار رمز عبور (با دکمه Show Password) ===== -->
+                <div x-data="{ showPassword2: false, focused: false }">
+                    <label for="id_password2"
+                           class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">تکرار
+                        رمز عبور</label>
+                    <div class="relative">
+                        <input :type="showPassword2 ? 'text' : 'password'"
+                               name="password2" id="id_password2"
+                               class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+                               :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+                               @focus="focused = true" @blur="focused = false"
+                               placeholder="رمز عبور را دوباره وارد کنید" required>
+                        <div class="absolute inset-y-0 right-1 flex items-center
+                            pl-2.5 pointer-events-none">
+                            <i data-lucide="lock" class="size-3.5 text-slate-400"></i>
+                        </div>
+                        <button type="button" @click="showPassword2 = !showPassword2"
+                                class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                                aria-label="نمایش رمز عبور">
+                            <i data-lucide="eye" class="size-3.5"
+                               x-show="!showPassword2"></i>
+                            <i data-lucide="eye-off" class="size-3.5"
+                               x-show="showPassword2"></i>
+                        </button>
+                    </div>
+                    {% if form.password2.errors %}
+                        <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ form.password2.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- ===== قبول قوانین ===== -->
+                <div class="flex items-start gap-2.5">
+                    <input type="checkbox" name="terms" id="id_terms" required
+                           class="mt-0.5 size-4 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-800">
+                    <label for="id_terms"
+                           class="text-sm text-slate-600 dark:text-slate-400">
+                        <a href="#"
+                           class="text-blue-600 hover:underline dark:text-blue-400">قوانین
+                            و مقررات</a>
+                        و
+                        <a href="#"
+                           class="text-blue-600 hover:underline dark:text-blue-400">حریم
+                            خصوصی</a>
+                        را مطالعه کرده و می‌پذیرم.
+                    </label>
+                </div>
+
+                <!-- ===== دکمه ثبت‌نام ===== -->
+                <!-- ===== دکمه ثبت‌نام ===== -->
+                <button type="submit"
+                        x-data="{ loading: false }"
+                        :disabled="loading"
+                        class="relative w-full rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 disabled:opacity-70 disabled:cursor-not-allowed">
+
+                    <span x-show="!loading">ثبت‌نام</span>
+
+                    <span x-show="loading"
+                          class="flex items-center justify-center gap-2">
+                     <svg class="size-4 animate-spin" xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                stroke="currentColor"
+                                stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962
+                    0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+        در حال ثبت‌نام...
+                 </span>
+                </button>
+
+                {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                {% endif %}
+            </form>
+
+            <!-- ===== لینک ورود ===== -->
+            <p class="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+                قبلاً حساب کاربری دارید؟
+                <a href="{% url 'apps.accounts:login' %}"
+                   class="font-medium text-blue-600 hover:underline dark:text-blue-400">
+                    وارد شوید
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== دکمه شناور تغییر تم ===== -->
+{% include 'partials/theme-toggle.html' %}
+
+<style>
+    @keyframes float {
+        0%, 100% {
+            transform: translate(0, 0) scale(1);
+        }
+        50% {
+            transform: translate(30px, -30px) scale(1.05);
+        }
+    }
+
+    @keyframes float-delay {
+        0%, 100% {
+            transform: translate(0, 0) scale(1);
+        }
+        50% {
+            transform: translate(-30px, 30px) scale(1.05);
+        }
+    }
+
+    .animate-float {
+        animation: float 12s ease-in-out infinite;
+    }
+
+    .animate-float-delay {
+        animation: float-delay 14s ease-in-out infinite;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+    });
+</script>
+<script>
+    document.addEventListener('alpine:init', () => {
+
+        Alpine.store('theme', {
+
+            dark: document.documentElement.classList.contains('dark'),
+
+            toggle() {
+
+                this.dark = !this.dark;
+
+                document.documentElement.classList.toggle('dark', this.dark);
+
+                localStorage.setItem(
+                    'theme',
+                    this.dark ? 'dark' : 'light'
+                );
+            }
+
+        });
+
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        const button = form?.querySelector('button[type="submit"]');
+
+        if (form && button) {
+            form.addEventListener('submit', function () {
+                // فعال‌سازی loading
+                if (button.__x) {
+                    button.__x.$data.loading = true;
+                }
+            });
+        }
+    });
+</script>
+<!-- Main JS (کرسر) -->
+<script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

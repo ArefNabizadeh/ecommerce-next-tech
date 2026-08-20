@@ -1,0 +1,138 @@
+<!-- templates/base-dashboard.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 md:gap-8">
+
+            <!-- ===== سایدبار (ستون چپ) ===== -->
+            <aside class="lg:col-span-1 space-y-4" data-aos="fade-up"
+                   data-aos-delay="50">
+
+                <!-- ===== کارت کاربر ===== -->
+                <div class="relative rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-5 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50 transition-colors duration-300 text-center">
+                    <div class="relative inline-block">
+                        <div class="size-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-2xl text-white shadow-lg mx-auto">
+                            {% if user.profile.avatar %}
+                                <img src="{{ user.profile.avatar.url }}"
+                                     alt="{{ user.get_full_name }}"
+                                     class="size-full rounded-full object-cover">
+                            {% else %}
+                                <span>{{ user.get_full_name|slice:":1"|default:user.username|slice:":1" }}</span>
+                            {% endif %}
+                        </div>
+                        <span class="absolute bottom-0 right-0 size-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900"></span>
+                    </div>
+
+                    <h3 class="mt-3 text-sm font-bold text-slate-800 dark:text-white truncate">
+                        {{ user.get_full_name|default:user.username }}
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ user.email }}</p>
+                    <div class="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+                        <i data-lucide="shield-check" class="size-3"></i>
+                        طلایی
+                    </div>
+                </div>
+
+                <!-- ===== منوی سایدبار ===== -->
+                <nav class="relative rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-2 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50 transition-colors duration-300"
+                     aria-label="منوی داشبورد">
+                    <div class="space-y-0.5">
+
+                        <!-- ===== داشبورد ===== -->
+                        <a href="{% url 'apps.dashboard:dashboard' %}"
+                           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                           :class="{
+                           'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400': request.resolver_match.url_name == 'dashboard',
+                           'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white': request.resolver_match.url_name != 'dashboard'
+                       }">
+                            <i data-lucide="layout-dashboard" class="size-4"></i>
+                            <span>داشبورد</span>
+                        </a>
+
+                        <!-- ===== سفارشات (با نمایش شرطی تعداد) ===== -->
+                        <a href="{% url 'apps.dashboard:orders' %}"
+                           x-data="{ ordersCount: {{ orders_count|default:0 }} }"
+                           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                           :class="{
+                           'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400': request.resolver_match.url_name == 'orders',
+                           'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white': request.resolver_match.url_name != 'orders'
+                       }">
+                            <i data-lucide="package" class="size-4"></i>
+                            <span>سفارشات</span>
+                            <span x-show="ordersCount > 0"
+                                  class="mr-auto rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                                  x-text="ordersCount">
+                        </span>
+                        </a>
+
+                        <!-- ===== علاقه‌مندی‌ها (با نمایش شرطی تعداد) ===== -->
+                        <a href="{% url 'apps.dashboard:wishlist' %}"
+                           x-data="{ wishlistCount: {{ wishlist_count|default:0 }} }"
+                           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                           :class="{
+                           'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400': request.resolver_match.url_name == 'wishlist',
+                           'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white': request.resolver_match.url_name != 'wishlist'
+                       }">
+                            <i data-lucide="heart" class="size-4"></i>
+                            <span>علاقه‌مندی‌ها</span>
+                            <span x-show="wishlistCount > 0"
+                                  class="mr-auto rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                                  x-text="wishlistCount">
+                        </span>
+                        </a>
+
+                        <!-- ===== آدرس‌ها (با نمایش شرطی تعداد) ===== -->
+                        <a href="{% url 'apps.dashboard:addresses' %}"
+                           x-data="{ addressesCount: {{ addresses_count|default:0 }} }"
+                           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                           :class="{
+                           'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400': request.resolver_match.url_name == 'addresses',
+                           'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white': request.resolver_match.url_name != 'addresses'
+                       }">
+                            <i data-lucide="map-pin" class="size-4"></i>
+                            <span>آدرس‌ها</span>
+                            <span x-show="addressesCount > 0"
+                                  class="mr-auto rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                                  x-text="addressesCount">
+                        </span>
+                        </a>
+
+                        <!-- ===== پروفایل ===== -->
+                        <a href="{% url 'apps.dashboard:profile' %}"
+                           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                           :class="{
+                           'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400': request.resolver_match.url_name == 'profile',
+                           'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white': request.resolver_match.url_name != 'profile'
+                       }">
+                            <i data-lucide="user" class="size-4"></i>
+                            <span>پروفایل</span>
+                        </a>
+
+                        <hr class="my-2 border-slate-200/50 dark:border-slate-700/50">
+
+                        <!-- ===== خروج ===== -->
+                        <form method="POST" action="{% url 'apps.accounts:logout' %}">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-600 transition-all duration-200 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30">
+                                <i data-lucide="log-out" class="size-4"></i>
+                                <span>خروج</span>
+                            </button>
+                        </form>
+
+                    </div>
+                </nav>
+
+            </aside>
+
+            <!-- ===== محتوای اصلی (ستون راست) ===== -->
+            <main class="lg:col-span-3 space-y-6" data-aos="fade-up"
+                  data-aos-delay="100">
+                {% block dashboard_content %}{% endblock %}
+            </main>
+
+        </div>
+    </div>
+{% endblock %}

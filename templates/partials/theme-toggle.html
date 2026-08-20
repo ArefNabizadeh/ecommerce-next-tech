@@ -1,0 +1,71 @@
+<!-- templates/partials/theme-toggle.html -->
+{% load static %}
+
+<div x-data class="fixed bottom-6 left-6 z-[999]">
+    <button
+        @click="$store.theme.toggle()"
+        class="group relative flex items-center justify-center w-14 h-14 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95"
+        :class="$store.theme.dark ? 'bg-slate-800 border border-slate-700 hover:bg-slate-700' : 'bg-blue-600 hover:bg-blue-700'"
+        aria-label="تغییر تم"
+    >
+        <!-- دایره نورانی -->
+        <span class="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            :class="$store.theme.dark ? 'bg-slate-700/50 blur-xl' : 'bg-blue-500/40 blur-xl'"
+        ></span>
+
+        <!--
+            نکته: اینجا عمداً از <i data-lucide> استفاده نشده.
+            lucide.createIcons() این المنت رو با یه <svg> کاملاً جدید عوض
+            می‌کنه، دقیقاً همون لحظه‌ای که هنوز Alpine لود نشده (چون با
+            defer دیرتر اجرا می‌شه). این یعنی گاهی attributeهای x-show و
+            x-transition درست منتقل نمی‌شن به svg جدید. با نوشتن SVG خام
+            این مشکل کاملاً از ریشه حذف می‌شه چون هیچ‌وقت این المنت توسط
+            چیز دیگه‌ای جایگزین نمی‌شه؛ Alpine از همون اول و همیشه
+            کنترلش رو داره.
+        -->
+        <svg
+            x-show="!$store.theme.dark"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 rotate-90"
+            x-transition:enter-end="opacity-100 rotate-0"
+            class="absolute size-6 text-white"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round"
+        >
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+        </svg>
+
+        <svg
+            x-show="$store.theme.dark"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 -rotate-90"
+            x-transition:enter-end="opacity-100 rotate-0"
+            class="absolute size-6 text-yellow-300"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round"
+        >
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2" />
+            <path d="M12 20v2" />
+            <path d="m4.93 4.93 1.41 1.41" />
+            <path d="m17.66 17.66 1.41 1.41" />
+            <path d="M2 12h2" />
+            <path d="M20 12h2" />
+            <path d="m6.34 17.66-1.41 1.41" />
+            <path d="m19.07 4.93-1.41 1.41" />
+        </svg>
+
+        <!-- Tooltip -->
+        <span
+            class="absolute right-full mr-3 px-3 py-1.5 text-xs font-medium text-white bg-slate-800/90 dark:bg-slate-700/90 backdrop-blur-sm rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+            x-text="$store.theme.dark ? 'تم روشن' : 'تم تاریک'"
+        ></span>
+
+        <!-- افکت ریپل -->
+        <span class="absolute inset-0 rounded-full border-2 border-white/20 animate-ping opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+    </button>
+
+    <span class="block mt-2 text-[10px] font-medium text-center text-slate-400 dark:text-slate-500">
+        تم
+    </span>
+</div>

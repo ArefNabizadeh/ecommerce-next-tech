@@ -1,0 +1,519 @@
+<!-- templates/dashboard/wishlist.html -->
+{% extends 'base-dashboard.html' %}
+{% load static %}
+
+{% block title %}علاقه‌مندی‌ها | نکست‌تک{% endblock %}
+
+{% block dashboard_content %}
+
+    <!-- ===== Wishlist Alpine Component ===== -->
+    <div
+            x-data="{
+        removeId: null,
+        showRemoveModal: false,
+
+        openRemoveModal(id) {
+            this.removeId = id;
+            this.showRemoveModal = true;
+            document.body.classList.add('overflow-hidden');
+        },
+
+        closeRemoveModal() {
+            this.showRemoveModal = false;
+            this.removeId = null;
+            document.body.classList.remove('overflow-hidden');
+        }
+    }"
+    >
+
+        <!-- ===== هدر صفحه ===== -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+             data-aos="fade-up">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-white">
+                    علاقه‌مندی‌ها
+                </h1>
+
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    محصولات مورد علاقه خود را مدیریت کنید
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+            <span class="rounded-full bg-rose-100 px-3 py-1 text-xs font-medium text-rose-700 dark:bg-rose-950/30 dark:text-rose-400">
+                <i data-lucide="heart" class="inline-block size-3 ml-1"></i>
+                {{ wishlist_count|default:0 }} محصول
+            </span>
+            </div>
+        </div>
+
+
+        <!-- ===== فیلتر و مرتب‌سازی ===== -->
+        <div
+                class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                data-aos="fade-up"
+                data-aos-delay="50"
+        >
+            <div class="flex items-center gap-2">
+
+                <select
+                        class="rounded-xl border bg-white/50 px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white"
+                >
+                    <option value="">همه دسته‌بندی‌ها</option>
+                    <option value="phones">گوشی موبایل</option>
+                    <option value="laptops">لپ‌تاپ</option>
+                    <option value="headphones">هدفون</option>
+                </select>
+
+                <select
+                        class="rounded-xl border bg-white/50 px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white"
+                >
+                    <option value="-created_at">جدیدترین</option>
+                    <option value="price">ارزان‌ترین</option>
+                    <option value="-price">گران‌ترین</option>
+                    <option value="name">الفبا</option>
+                </select>
+
+            </div>
+
+            <div class="flex items-center gap-1.5">
+
+                <button
+                        type="button"
+                        class="rounded-lg bg-blue-600 p-2 text-white transition-colors"
+                        aria-label="نمایش شبکه‌ای"
+                >
+                    <i data-lucide="grid-2x2" class="size-4"></i>
+                </button>
+
+                <button
+                        type="button"
+                        class="rounded-lg bg-slate-100 p-2 text-slate-500 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                        aria-label="نمایش لیستی"
+                >
+                    <i data-lucide="list" class="size-4"></i>
+                </button>
+
+            </div>
+        </div>
+
+
+        <!-- ===== لیست محصولات ===== -->
+        {% if wishlist %}
+
+            <div
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
+                    data-aos="fade-up"
+                    data-aos-delay="100"
+            >
+
+                {% for item in wishlist %}
+
+                    <div
+                            class="group relative rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 shadow-xl transition-all duration-200 hover:shadow-2xl hover:-translate-y-1 dark:bg-slate-900/80 dark:border-slate-800/50 dark:hover:shadow-2xl"
+                    >
+
+                        <!-- ===== تصویر ===== -->
+                        <div class="relative overflow-hidden rounded-t-3xl bg-slate-100 dark:bg-slate-800">
+
+                            {% if item.product.image %}
+
+                                <img
+                                        src="{{ item.product.image.url }}"
+                                        alt="{{ item.product.name }}"
+                                        class="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                >
+
+                            {% else %}
+
+                                <div class="h-48 w-full flex items-center justify-center text-slate-400 dark:text-slate-600">
+                                    <i data-lucide="image" class="size-12"></i>
+                                </div>
+
+                            {% endif %}
+
+
+                            <!-- ===== برچسب تخفیف ===== -->
+                            {% if item.product.discount_price %}
+
+                                <div class="absolute top-3 right-3 rounded-full bg-rose-500 px-2.5 py-0.5 text-[10px] font-bold text-white">
+                                    {{ item.product.get_discount_percent|default:"-??" }}%
+                                </div>
+
+                            {% endif %}
+
+
+                            <!-- ===== دکمه حذف از علاقه‌مندی‌ها ===== -->
+                            <button
+                                    type="button"
+                                    @click="openRemoveModal({{ item.id }})"
+                                    class="absolute top-3 left-3 rounded-full bg-white/80 p-2 text-rose-500 transition-all duration-200 hover:bg-white hover:scale-110 dark:bg-slate-900/80 dark:hover:bg-slate-900 z-20"
+                                    aria-label="حذف از علاقه‌مندی‌ها"
+                            >
+                                <i
+                                        data-lucide="heart"
+                                        class="size-4 fill-rose-500 text-rose-500"
+                                ></i>
+                            </button>
+
+
+                            <!-- ===== دکمه‌های هاور ===== -->
+                            <div
+                                    class="absolute inset-0 flex items-center justify-center gap-3 bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10 pointer-events-none"
+                            >
+
+                                <a
+                                        href="{% url 'apps.products:product_detail' item.product.id  %}"
+                                        class="pointer-events-auto rounded-full bg-white p-2.5 text-slate-700 transition-all hover:scale-110 hover:bg-blue-600 hover:text-white"
+                                        aria-label="مشاهده سریع"
+                                >
+                                    <i data-lucide="eye" class="size-4"></i>
+                                </a>
+
+
+                                <form
+                                        method="POST"
+                                        action="{% url 'apps.cart:add_to_cart' item.product.id %}"
+                                        class="pointer-events-auto inline-block"
+                                >
+                                    {% csrf_token %}
+
+                                    <input
+                                            type="hidden"
+                                            name="quantity"
+                                            value="1"
+                                    >
+
+                                    <button
+                                            type="submit"
+                                            class="rounded-full bg-white p-2.5 text-slate-700 transition-all hover:scale-110 hover:bg-blue-600 hover:text-white"
+                                            aria-label="افزودن به سبد خرید"
+                                            {% if not item.product.is_in_stock %}disabled{% endif %}
+                                    >
+                                        <i data-lucide="shopping-cart"
+                                           class="size-4"></i>
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ===== اطلاعات محصول ===== -->
+                        <div class="p-4 space-y-2">
+
+                            <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                            <span>
+                                {{ item.product.category.name|default:"دسته‌بندی" }}
+                            </span>
+
+                                <span>
+                                {{ item.product.brand.name|default:"برند" }}
+                            </span>
+                            </div>
+
+
+                            <h3 class="text-sm font-semibold text-slate-800 dark:text-white line-clamp-1">
+
+                                <a
+                                        href="{% url 'apps.products:product_detail' item.product.id  %}"
+                                        class="hover:text-blue-600 transition-colors"
+                                >
+                                    {{ item.product.name }}
+                                </a>
+
+                            </h3>
+
+
+                            <!-- ===== امتیاز ===== -->
+                            <div class="flex items-center gap-2">
+
+                                <div class="flex items-center text-amber-400">
+
+                                    {% with avg=item.product.average_rating|default:0 %}
+
+                                        {% for i in "12345"|make_list %}
+
+                                            {% if forloop.counter <= avg %}
+
+                                                <i
+                                                        data-lucide="star"
+                                                        class="size-3.5 fill-amber-400"
+                                                ></i>
+
+                                            {% else %}
+
+                                                <i
+                                                        data-lucide="star"
+                                                        class="size-3.5 text-slate-300 dark:text-slate-600"
+                                                ></i>
+
+                                            {% endif %}
+
+                                        {% endfor %}
+
+                                    {% endwith %}
+
+                                </div>
+
+                                <span class="text-xs text-slate-400">
+                                ({{ item.product.reviews_count|default:0 }})
+                            </span>
+
+                            </div>
+
+
+                            <!-- ===== قیمت ===== -->
+                            <div class="flex items-center gap-2">
+
+                                {% if item.product.discount_price %}
+
+                                    <span class="text-lg font-bold text-blue-600 dark:text-blue-400">
+                                    {{ item.product.discount_price|floatformat:0 }}
+                                </span>
+
+                                    <span class="text-sm text-slate-400 line-through">
+                                    {{ item.product.price|floatformat:0 }}
+                                </span>
+
+                                {% else %}
+
+                                    <span class="text-lg font-bold text-slate-800 dark:text-white">
+                                    {{ item.product.price|floatformat:0 }}
+                                </span>
+
+                                {% endif %}
+
+                                <span class="text-xs text-slate-400">
+                                تومان
+                            </span>
+
+                            </div>
+
+
+                            <!-- ===== وضعیت موجودی ===== -->
+                            <div class="flex items-center gap-1.5">
+
+                                {% if item.product.stock > 0 %}
+
+                                    <span class="inline-flex size-2 rounded-full bg-emerald-500"></span>
+
+                                    <span class="text-xs text-emerald-600 dark:text-emerald-400">
+                                    موجود
+                                </span>
+
+                                {% else %}
+
+                                    <span class="inline-flex size-2 rounded-full bg-rose-500"></span>
+
+                                    <span class="text-xs text-rose-600 dark:text-rose-400">
+                                    ناموجود
+                                </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ===== افزودن به سبد ===== -->
+                        <div class="p-4 pt-0 border-t border-slate-200/50 dark:border-slate-700/50">
+
+                            <form
+                                    method="POST"
+                                    action="{% url 'apps.cart:add_to_cart' item.product.id %}"
+                                    class="flex-1"
+                            >
+                                {% csrf_token %}
+
+                                <input
+                                        type="hidden"
+                                        name="quantity"
+                                        value="1"
+                                >
+
+                                <button
+                                        type="submit"
+                                        class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40"
+                                        {% if not item.product.is_in_stock %}disabled{% endif %}
+                                >
+
+                                    <i data-lucide="shopping-cart" class="size-4"></i>
+
+                                    {% if item.product.is_in_stock %}
+                                        افزودن به سبد خرید
+                                    {% else %}
+                                        ناموجود
+                                    {% endif %}
+
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <!-- ===== Pagination ===== -->
+            {% if is_paginated %}
+
+                <div data-aos="fade-up" data-aos-delay="200">
+
+                    {% include 'partials/pagination.html' with page_obj=page_obj query_params=query_params %}
+
+                </div>
+
+            {% endif %}
+
+
+        {% else %}
+
+            <!-- ===== Wishlist Empty ===== -->
+            <div
+                    class="flex flex-col items-center justify-center rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-12 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50 text-center"
+                    data-aos="fade-up"
+                    data-aos-delay="100"
+            >
+
+                <div class="size-24 rounded-full bg-rose-100 flex items-center justify-center dark:bg-rose-950/30">
+                    <i data-lucide="heart" class="size-12 text-rose-400"></i>
+                </div>
+
+                <h3 class="mt-4 text-xl font-bold text-slate-800 dark:text-white">
+                    علاقه‌مندی‌ها خالی است
+                </h3>
+
+                <p class="mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
+                    محصولات مورد علاقه خود را به این لیست اضافه کنید تا بعداً به راحتی
+                    پیدا کنید.
+                </p>
+
+                <a
+                        href="{% url 'apps.products:product_list' %}"
+                        class="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40"
+                >
+                    <i data-lucide="shopping-bag" class="size-4"></i>
+                    مشاهده محصولات
+                </a>
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- ======================================== -->
+        <!-- ===== مودال حذف از علاقه‌مندی‌ها ===== -->
+        <!-- ======================================== -->
+
+        <div
+                x-show="showRemoveModal"
+                x-cloak
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+                @click.self="closeRemoveModal()"
+                @keydown.escape.window="closeRemoveModal()"
+        >
+
+            <div
+                    x-transition:enter="transition ease-out duration-300 transform"
+                    x-transition:enter-start="scale-95 opacity-0 translate-y-8"
+                    x-transition:enter-end="scale-100 opacity-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-200 transform"
+                    x-transition:leave-start="scale-100 opacity-100 translate-y-0"
+                    x-transition:leave-end="scale-95 opacity-0 translate-y-8"
+                    class="relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900 text-center"
+            >
+
+                <!-- ===== بستن Modal ===== -->
+                <button
+                        type="button"
+                        @click="closeRemoveModal()"
+                        class="absolute left-2 top-4 rounded-full p-2
+                        transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                        aria-label="بستن"
+                >
+                    <i data-lucide="x" class="size-5 text-slate-500"></i>
+                </button>
+
+
+                <!-- ===== Icon ===== -->
+                <div class="size-16 rounded-full bg-rose-100 flex items-center justify-center mx-auto dark:bg-rose-950/30">
+                    <i data-lucide="heart" class="size-8 text-rose-500"></i>
+                </div>
+
+
+                <!-- ===== عنوان ===== -->
+                <h3 class="mt-4 text-xl font-bold text-slate-800 dark:text-white">
+                    حذف از علاقه‌مندی‌ها
+                </h3>
+
+
+                <!-- ===== توضیح ===== -->
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                    آیا از حذف این محصول از لیست علاقه‌مندی‌ها اطمینان دارید؟
+                </p>
+
+
+                <!-- ===== Actions ===== -->
+                <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+
+                    <!-- حذف -->
+                    <form
+                            method="POST"
+                            :action="`{% url 'apps.dashboard:remove_wishlist' 0 %}`.replace('0', removeId)"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                                type="submit"
+                                class="rounded-xl bg-rose-600 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-rose-700"
+                        >
+                            حذف
+                        </button>
+
+                    </form>
+
+
+                    <!-- انصراف -->
+                    <button
+                            type="button"
+                            @click="closeRemoveModal()"
+                            class="rounded-xl border border-slate-300 px-6 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                    >
+                        انصراف
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+
+{% endblock %}

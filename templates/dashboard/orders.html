@@ -1,0 +1,291 @@
+<!-- templates/dashboard/orders.html -->
+{% extends 'base-dashboard.html' %}
+{% load static %}
+
+{% block title %}سفارشات من | نکست‌تک{% endblock %}
+
+{% block dashboard_content %}
+
+<!-- ===== هدر صفحه ===== -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" data-aos="fade-up">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">سفارشات من</h1>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">مشاهده و مدیریت تمام سفارشات شما</p>
+    </div>
+</div>
+
+<!-- ===== آمار سفارشات ===== -->
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" data-aos="fade-up" data-aos-delay="50">
+
+    <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-3 text-center shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+        <p class="text-xl font-bold text-slate-800 dark:text-white">{{ total_orders|default:0 }}</p>
+        <p class="text-[10px] text-slate-500 dark:text-slate-400">کل</p>
+    </div>
+
+    <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-3 text-center shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+        <p class="text-xl font-bold text-amber-600 dark:text-amber-400">{{ pending_orders|default:0 }}</p>
+        <p class="text-[10px] text-slate-500 dark:text-slate-400">در انتظار</p>
+    </div>
+
+    <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-3 text-center shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+        <p class="text-xl font-bold text-blue-600 dark:text-blue-400">{{ preparing_orders|default:0 }}</p>
+        <p class="text-[10px] text-slate-500 dark:text-slate-400">در حال آماده‌سازی</p>
+    </div>
+
+    <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-3 text-center shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+        <p class="text-xl font-bold text-indigo-600 dark:text-indigo-400">{{ shipping_orders|default:0 }}</p>
+        <p class="text-[10px] text-slate-500 dark:text-slate-400">در حال ارسال</p>
+    </div>
+
+    <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-3 text-center shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+        <p class="text-xl font-bold text-emerald-600 dark:text-emerald-400">{{ delivered_orders|default:0 }}</p>
+        <p class="text-[10px] text-slate-500 dark:text-slate-400">تحویل شده</p>
+    </div>
+
+    <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-3 text-center shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+        <p class="text-xl font-bold text-rose-600 dark:text-rose-400">{{ cancelled_orders|default:0 }}</p>
+        <p class="text-[10px] text-slate-500 dark:text-slate-400">لغو شده</p>
+    </div>
+
+</div>
+
+<!-- ===== فیلتر و جستجو ===== -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" data-aos="fade-up" data-aos-delay="100">
+
+    <!-- جستجو -->
+    <div class="relative flex-1 max-w-sm">
+        <input type="text" placeholder="جستجوی سفارش..."
+            class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500">
+        <div class="absolute inset-y-0 right-0 flex items-center pl-3 pointer-events-none">
+            <i data-lucide="search" class="size-4 text-slate-400"></i>
+        </div>
+    </div>
+
+    <!-- فیلتر وضعیت -->
+    <div class="flex items-center gap-2">
+        <select class="rounded-xl border bg-white/50 px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white">
+            <option value="">همه وضعیت‌ها</option>
+            <option value="pending">در انتظار</option>
+            <option value="paid">پرداخت شده</option>
+            <option value="preparing">در حال آماده‌سازی</option>
+            <option value="shipping">در حال ارسال</option>
+            <option value="delivered">تحویل شده</option>
+            <option value="cancelled">لغو شده</option>
+        </select>
+
+        <select class="rounded-xl border bg-white/50 px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white">
+            <option value="-created_at">جدیدترین</option>
+            <option value="created_at">قدیمی‌ترین</option>
+            <option value="-total_price">گران‌ترین</option>
+            <option value="total_price">ارزان‌ترین</option>
+        </select>
+    </div>
+
+</div>
+
+<!-- ===== لیست سفارشات ===== -->
+{% if orders %}
+    <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50 overflow-hidden" data-aos="fade-up" data-aos-delay="150">
+
+        <!-- ===== جدول دسکتاپ ===== -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-slate-200/50 dark:border-slate-700/50">
+                        <th class="px-4 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400">شماره سفارش</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400">تاریخ</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400">تعداد</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400">قیمت کل</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400">وضعیت پرداخت</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400">وضعیت ارسال</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200/50 dark:divide-slate-700/50">
+                    {% for order in orders %}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                        <td class="px-4 py-3 font-medium text-slate-800 dark:text-white">
+                            #{{ order.order_number }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-400">
+                            {{ order.created_at }}
+                        </td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-400">
+                            {{ order.items_count }}
+                        </td>
+                        <td class="px-4 py-3 font-bold text-slate-800 dark:text-white">
+                            {{ order.total_price|floatformat:0 }} تومان
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="rounded-full px-2.5 py-0.5 text-[10px] font-medium"
+                                :class="{
+                                    'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400': '{{ order.payment_status }}' == 'pending',
+                                    'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400': '{{ order.payment_status }}' == 'paid'
+                                }">
+                                {{ order.get_payment_status }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="rounded-full px-2.5 py-0.5 text-[10px] font-medium"
+                                :class="{
+                                    'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400': '{{ order.status }}' == 'pending',
+                                    'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400': '{{ order.status }}' == 'processing' || '{{ order.status }}' == 'preparing',
+                                    'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400': '{{ order.status }}' == 'shipping',
+                                    'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400': '{{ order.status }}' == 'delivered',
+                                    'bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400': '{{ order.status }}' == 'cancelled'
+                                }">
+                                {{ order.get_status }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-1">
+                                <a href=""
+                                    class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+                                    aria-label="جزئیات">
+                                    <i data-lucide="eye" class="size-4"></i>
+                                </a>
+                                {% if order.status == 'pending' %}
+                                <button
+                                    @click="openCancelModal({{ order.id }})"
+                                    class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-rose-600 dark:hover:bg-slate-800 dark:hover:text-rose-400"
+                                    aria-label="لغو سفارش">
+                                    <i data-lucide="x-circle" class="size-4"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== کارت موبایل ===== -->
+        <div class="md:hidden divide-y divide-slate-200/50 dark:divide-slate-700/50">
+            {% for order in orders %}
+            <div class="p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="font-medium text-slate-800 dark:text-white">#{{ order.order_number }}</span>
+                    <span class="rounded-full px-2.5 py-0.5 text-[10px] font-medium"
+                        :class="{
+                            'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400': '{{ order.status }}' == 'pending',
+                            'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400': '{{ order.status }}' == 'processing' || '{{ order.status }}' == 'preparing',
+                            'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400': '{{ order.status }}' == 'shipping',
+                            'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400': '{{ order.status }}' == 'delivered',
+                            'bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400': '{{ order.status }}' == 'cancelled'
+                        }">
+                        {{ order.get_status }}
+                    </span>
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-slate-500 dark:text-slate-400">{{ order.created_at }}</span>
+                    <span class="font-bold text-slate-800 dark:text-white">{{ order.total_price|floatformat:0 }} تومان</span>
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-slate-500 dark:text-slate-400">{{ order.items_count}} محصول</span>
+                    <div class="flex items-center gap-1">
+                        <a href=""
+                            class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400">
+                            <i data-lucide="eye" class="size-4"></i>
+                        </a>
+                        {% if order.status == 'pending' %}
+                        <button
+                            @click="openCancelModal({{ order.id }})"
+                            class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-rose-600 dark:hover:bg-slate-800 dark:hover:text-rose-400">
+                            <i data-lucide="x-circle" class="size-4"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <!-- ===== صفحه‌بندی ===== -->
+    {% if is_paginated %}
+    <div data-aos="fade-up" data-aos-delay="200">
+        {% include 'partials/pagination.html' with page_obj=page_obj query_params=query_params %}
+    </div>
+    {% endif %}
+
+{% else %}
+    <!-- ===== حالت خالی ===== -->
+    <div class="flex flex-col items-center justify-center rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-12 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50 text-center" data-aos="fade-up" data-aos-delay="150">
+        <div class="size-24 rounded-full bg-slate-100 flex items-center justify-center dark:bg-slate-800">
+            <i data-lucide="package" class="size-12 text-slate-400"></i>
+        </div>
+        <h3 class="mt-4 text-xl font-bold text-slate-800 dark:text-white">هنوز سفارشی ثبت نکرده‌اید</h3>
+        <p class="mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
+            اولین سفارش خود را ثبت کنید و از محصولات با کیفیت نکست‌تک لذت ببرید.
+        </p>
+        <a href="{% url 'apps.products:product_list' %}" class="mt-6 inline-flex
+        items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40">
+            <i data-lucide="shopping-bag" class="size-4"></i>
+            شروع خرید
+        </a>
+    </div>
+{% endif %}
+
+<!-- ======================================== -->
+<!-- ===== مودال لغو سفارش ===== -->
+<!-- ======================================== -->
+
+<div
+    x-data="{ cancelId: null, showCancelModal: false }"
+    x-init="window.openCancelModal = (id) => { cancelId = id; showCancelModal = true; }"
+>
+    <div
+        x-show="showCancelModal"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+        @click.self="showCancelModal = false"
+    >
+        <div
+            x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="scale-95 opacity-0 translate-y-8"
+            x-transition:enter-end="scale-100 opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200 transform"
+            x-transition:leave-start="scale-100 opacity-100 translate-y-0"
+            x-transition:leave-end="scale-95 opacity-0 translate-y-8"
+            class="relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900 text-center"
+        >
+            <div class="size-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto dark:bg-amber-950/30">
+                <i data-lucide="alert-triangle" class="size-8 text-amber-600 dark:text-amber-400"></i>
+            </div>
+
+            <h3 class="mt-4 text-xl font-bold text-slate-800 dark:text-white">لغو سفارش</h3>
+            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                آیا از لغو این سفارش اطمینان دارید؟ این عمل قابل بازگشت نیست.
+            </p>
+
+            <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <form method="POST" :action="">
+                    {% csrf_token %}
+                    <button type="submit" class="rounded-xl bg-amber-600 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-amber-700">
+                        لغو سفارش
+                    </button>
+                </form>
+                <button @click="showCancelModal = false" class="rounded-xl border border-slate-300 px-6 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                    انصراف
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+    });
+</script>
+{% endblock %}

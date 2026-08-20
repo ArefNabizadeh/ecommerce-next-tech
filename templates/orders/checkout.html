@@ -1,0 +1,411 @@
+<!-- templates/orders/checkout.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تسویه حساب | نکست‌تک{% endblock %}
+
+{% block content %}
+
+<div class="container max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+    <!-- ===== هدر صفحه ===== -->
+    <div class="text-center mb-10" data-aos="fade-up">
+        <h1 class="text-3xl md:text-4xl font-bold text-slate-800 dark:text-white">
+            تسویه حساب
+        </h1>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+            اطلاعات خود را تکمیل کنید تا سفارش شما ثبت شود
+        </p>
+    </div>
+
+    <!-- ===== مراحل تسویه حساب ===== -->
+    <div class="flex items-center justify-center gap-2 md:gap-4 mb-10"
+         data-aos="fade-up" data-aos-delay="50">
+        <div class="flex items-center gap-2">
+            <span class="flex items-center justify-center size-8 rounded-full bg-blue-600 text-sm font-bold text-white">۱</span>
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">سبد خرید</span>
+        </div>
+        <div class="w-12 h-0.5 bg-blue-600"></div>
+        <div class="flex items-center gap-2">
+            <span class="flex items-center justify-center size-8 rounded-full bg-blue-600 text-sm font-bold text-white">۲</span>
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">اطلاعات ارسال</span>
+        </div>
+        <div class="w-12 h-0.5 bg-slate-300 dark:bg-slate-700"></div>
+        <div class="flex items-center gap-2">
+            <span class="flex items-center justify-center size-8 rounded-full bg-slate-300 text-sm font-bold text-slate-500 dark:bg-slate-700 dark:text-slate-400">۳</span>
+            <span class="text-sm font-medium text-slate-400 dark:text-slate-500">پرداخت</span>
+        </div>
+    </div>
+
+    <!-- ===== پیام‌ها ===== -->
+    {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+                <div class="rounded-xl p-4 text-sm {% if message.tags == 'error' %}bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400{% elif message.tags == 'success' %}bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400{% elif message.tags == 'warning' %}bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400{% else %}bg-blue-50 text-blue-600 dark:bg-blue-950/20 dark:text-blue-400{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- ===== محتوای اصلی ===== -->
+    <form method="POST" action="{% url 'apps.orders:checkout' %}"
+          x-data="{ loading: false }"
+          @submit="loading = true"
+          class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {% csrf_token %}
+
+        <!-- ===== ستون سمت چپ: فرم ===== -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- ===== اطلاعات مشتری ===== -->
+            <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50"
+                 data-aos="fade-up" data-aos-delay="100">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <i data-lucide="user" class="size-5 text-blue-600"></i>
+                    اطلاعات مشتری
+                </h2>
+
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">نام کامل</label>
+                        <input type="text"
+                               value="{{ user.get_full_name|default:user.username }}"
+                               class="w-full rounded-xl border bg-white/50 px-4 py-2.5 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white"
+                               readonly/>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">شماره تلفن</label>
+                        <input type="tel"
+                               value="{{ user.profile.phone|default:'۰۹۱۲۳۴۵۶۷۸۹' }}"
+                               class="w-full rounded-xl border bg-white/50 px-4 py-2.5 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white"
+                               readonly/>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">ایمیل</label>
+                        <input type="email"
+                               value="{{ user.email|default:'info@example.com' }}"
+                               class="w-full rounded-xl border bg-white/50 px-4 py-2.5 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white"
+                               readonly/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== انتخاب آدرس ===== -->
+            <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50"
+                 data-aos="fade-up" data-aos-delay="150">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <i data-lucide="map-pin" class="size-5 text-blue-600"></i>
+                        آدرس تحویل
+                    </h2>
+                    <a href="{% url 'apps.dashboard:addresses' %}"
+                       class="text-sm text-blue-600 hover:underline dark:text-blue-400">
+                        <i data-lucide="plus" class="size-3.5 inline-block ml-1"></i>
+                        مدیریت آدرس‌ها
+                    </a>
+                </div>
+
+                <div class="mt-4 space-y-3">
+                    {% if addresses %}
+                        {% for address in addresses %}
+                            <div class="flex items-start gap-3 rounded-xl border p-4 transition-all hover:border-blue-400 dark:border-slate-700 {% if address.is_default %}border-2 border-blue-500 bg-blue-50/50 dark:border-blue-600 dark:bg-blue-950/20{% endif %}">
+                                <input type="radio"
+                                       name="address_id"
+                                       value="{{ address.id }}"
+                                       {% if address.is_default %}checked{% endif %}
+                                       class="mt-1 size-4 text-blue-600 focus:ring-2 focus:ring-blue-200"
+                                       required/>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <p class="font-medium text-slate-800 dark:text-white">
+                                            {{ address.recipient_name }}
+                                        </p>
+                                        {% if address.is_default %}
+                                            <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">پیش‌فرض</span>
+                                        {% endif %}
+                                    </div>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400">
+                                        {{ address.province }}، {{ address.city }}
+                                    </p>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400">
+                                        {{ address.street_address }}
+                                    </p>
+                                    {% if address.postal_code %}
+                                        <p class="text-xs text-slate-500 dark:text-slate-500">
+                                            کد پستی: {{ address.postal_code }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <p class="text-sm text-slate-500 dark:text-slate-400">
+                                هیچ آدرسی ثبت نشده است.
+                            </p>
+                            <a href="{% url 'apps.dashboard:addresses' %}"
+                               class="text-sm text-blue-600 hover:underline dark:text-blue-400">افزودن آدرس جدید</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- ===== روش ارسال ===== -->
+            <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50"
+                 data-aos="fade-up" data-aos-delay="200">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <i data-lucide="truck" class="size-5 text-blue-600"></i>
+                    روش ارسال
+                </h2>
+
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <label class="flex items-center gap-3 rounded-xl border-2 {% if selected_shipping == 'standard' %}border-blue-500 bg-blue-50/50 dark:border-blue-600 dark:bg-blue-950/20{% else %}border-slate-200 dark:border-slate-700{% endif %} p-3 transition-all hover:border-blue-400 cursor-pointer">
+                        <input type="radio"
+                               name="shipping_method"
+                               value="standard"
+                               {% if selected_shipping == 'standard' %}checked{% endif %}
+                               class="size-4 text-blue-600"
+                               data-shipping/>
+                        <div>
+                            <p class="text-sm font-medium text-slate-800 dark:text-white">ارسال عادی</p>
+                            <p class="text-xs text-slate-500">۳-۵ روز</p>
+                            <p class="text-xs font-bold text-blue-600">رایگان</p>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-3 rounded-xl border {% if selected_shipping == 'express' %}border-2 border-blue-500 bg-blue-50/50 dark:border-blue-600 dark:bg-blue-950/20{% else %}border-slate-200 dark:border-slate-700{% endif %} p-3 transition-all hover:border-blue-400 cursor-pointer">
+                        <input type="radio"
+                               name="shipping_method"
+                               value="express"
+                               {% if selected_shipping == 'express' %}checked{% endif %}
+                               class="size-4 text-blue-600"
+                               data-shipping/>
+                        <div>
+                            <p class="text-sm font-medium text-slate-800 dark:text-white">ارسال فوری</p>
+                            <p class="text-xs text-slate-500">۲۴ ساعته</p>
+                            <p class="text-xs font-bold text-amber-600">۲۵,۰۰۰ تومان</p>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-3 rounded-xl border {% if selected_shipping == 'premium' %}border-2 border-blue-500 bg-blue-50/50 dark:border-blue-600 dark:bg-blue-950/20{% else %}border-slate-200 dark:border-slate-700{% endif %} p-3 transition-all hover:border-blue-400 cursor-pointer">
+                        <input type="radio"
+                               name="shipping_method"
+                               value="premium"
+                               {% if selected_shipping == 'premium' %}checked{% endif %}
+                               class="size-4 text-blue-600"
+                               data-shipping/>
+                        <div>
+                            <p class="text-sm font-medium text-slate-800 dark:text-white">ارسال ویژه</p>
+                            <p class="text-xs text-slate-500">۶-۱۲ ساعت</p>
+                            <p class="text-xs font-bold text-rose-600">۵۰,۰۰۰ تومان</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ===== روش پرداخت ===== -->
+            <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50"
+                 data-aos="fade-up" data-aos-delay="250">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <i data-lucide="credit-card" class="size-5 text-blue-600"></i>
+                    روش پرداخت
+                </h2>
+
+                <div class="mt-4 space-y-3">
+                    <label class="flex items-center gap-3 rounded-xl border-2 border-blue-500 bg-blue-50/50 p-3 dark:border-blue-600 dark:bg-blue-950/20 cursor-pointer">
+                        <input type="radio"
+                               name="payment_method"
+                               value="online"
+                               checked
+                               class="size-4 text-blue-600"/>
+                        <i data-lucide="credit-card" class="size-5 text-blue-600"></i>
+                        <div>
+                            <p class="text-sm font-medium text-slate-800 dark:text-white">پرداخت آنلاین</p>
+                            <p class="text-xs text-slate-500">زرین‌پال / پی‌لاین</p>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-3 rounded-xl border border-slate-200 p-3 transition-all hover:border-blue-400 dark:border-slate-700 cursor-pointer">
+                        <input type="radio"
+                               name="payment_method"
+                               value="wallet"
+                               class="size-4 text-blue-600"/>
+                        <i data-lucide="wallet" class="size-5 text-amber-600"></i>
+                        <div>
+                            <p class="text-sm font-medium text-slate-800 dark:text-white">کیف پول</p>
+                            <p class="text-xs text-slate-500">موجودی: ۰ تومان</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ===== یادداشت سفارش ===== -->
+            <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50"
+                 data-aos="fade-up" data-aos-delay="300">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <i data-lucide="edit" class="size-5 text-blue-600"></i>
+                    یادداشت سفارش
+                </h2>
+                <textarea name="note"
+                          rows="3"
+                          placeholder="نکات ویژه برای ارسال (اختیاری)..."
+                          class="mt-4 w-full rounded-xl border bg-white/50 px-4 py-3 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"></textarea>
+            </div>
+        </div>
+
+        <!-- ===== ستون سمت راست: خلاصه سفارش ===== -->
+        <div class="lg:col-span-1">
+            <div class="sticky top-24 space-y-4">
+                <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50"
+                     data-aos="fade-up" data-aos-delay="200">
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">خلاصه سفارش</h3>
+
+                    <!-- ===== آیتم‌های سفارش ===== -->
+                    <div class="mt-4 max-h-60 overflow-y-auto space-y-3">
+                        {% for item in cart_items|slice:":3" %}
+                            <div class="flex items-center gap-3 rounded-xl border border-slate-200/50 p-2 dark:border-slate-700/50">
+                                <div class="size-12 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden flex-shrink-0">
+                                    {% if item.product.image %}
+                                        <img src="{{ item.product.image.url }}"
+                                             alt="{{ item.product.name }}"
+                                             class="size-full object-cover"/>
+                                    {% else %}
+                                        <div class="size-full flex items-center justify-center text-slate-400">
+                                            <i data-lucide="image" class="size-5"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-medium text-slate-800 dark:text-white truncate">
+                                        {{ item.product.name }}
+                                    </p>
+                                    <p class="text-xs text-slate-500">x{{ item.quantity }}</p>
+                                </div>
+                                <span class="text-sm font-bold text-slate-800 dark:text-white">{{ item.total_price|floatformat:0 }}</span>
+                            </div>
+                        {% endfor %}
+                        {% if cart_items|length > 3 %}
+                            <p class="text-xs text-slate-400 text-center">
+                                + {{ cart_items|length|add:"-3" }} محصول دیگر
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <!-- ===== جمع‌بندی قیمت ===== -->
+                    <div class="mt-4 space-y-2 pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-slate-500 dark:text-slate-400">جمع کل</span>
+                            <span class="font-medium text-slate-800 dark:text-white">{{ subtotal|floatformat:0|default:0 }} تومان</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-slate-500 dark:text-slate-400">تخفیف محصولات</span>
+                            <span class="font-medium text-rose-600 dark:text-rose-400">-{{ product_discount|floatformat:0|default:0 }} تومان</span>
+                        </div>
+
+                        <!-- ===== نمایش تخفیف کوپن (اگر وجود داشته باشد) ===== -->
+                        {% if coupon_code and coupon_discount > 0 %}
+                            <div class="flex items-center justify-between text-sm bg-emerald-50 dark:bg-emerald-950/20 p-2 rounded-lg">
+                                <span class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                    <i data-lucide="ticket" class="size-3.5"></i>
+                                    کد تخفیف ({{ coupon_code }})
+                                </span>
+                                <span class="font-medium text-emerald-700 dark:text-emerald-300">-{{ coupon_discount|floatformat:0 }} تومان</span>
+                            </div>
+                        {% endif %}
+
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-slate-500 dark:text-slate-400">هزینه ارسال</span>
+                            <span class="font-medium text-slate-800 dark:text-white">
+                                {% if shipping_cost > 0 %}
+                                    {{ shipping_cost|floatformat:0|default:0 }} تومان
+                                {% else %}
+                                    رایگان
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-slate-500 dark:text-slate-400">مالیات (۹%)</span>
+                            <span class="font-medium text-slate-800 dark:text-white">{{ tax|floatformat:0|default:0 }} تومان</span>
+                        </div>
+
+                        <!-- ===== کد تخفیف (غیرفعال - فقط نمایش) ===== -->
+                        <div class="pt-2 border-t border-slate-200/50 dark:border-slate-700/50">
+                            <div class="flex items-center justify-between text-sm text-slate-400">
+                                <span>کد تخفیف</span>
+                                <span class="text-xs">در سبد خرید اعمال شود</span>
+                            </div>
+                        </div>
+
+                        <!-- ===== قیمت نهایی ===== -->
+                        <div class="pt-2 border-t border-slate-200/50 dark:border-slate-700/50">
+                            <div class="flex items-center justify-between">
+                                <span class="text-base font-bold text-slate-800 dark:text-white">قابل پرداخت</span>
+                                <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ total_price|floatformat:0|default:0 }} تومان</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== دکمه پرداخت ===== -->
+                    <button type="submit"
+                            :disabled="loading"
+                            class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 disabled:opacity-70">
+                        <span x-show="!loading">
+                            <i data-lucide="credit-card" class="size-4"></i>
+                            پرداخت سفارش
+                        </span>
+                        <span x-show="loading" class="flex items-center gap-2">
+                            <svg class="size-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            در حال پردازش...
+                        </span>
+                    </button>
+
+                    <!-- ===== نشان امنیت ===== -->
+                    <div class="mt-4 flex items-center justify-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                        <i data-lucide="shield-check" class="size-4 text-emerald-500"></i>
+                        <span>پرداخت امن و رمزنگاری شده</span>
+                    </div>
+                </div>
+
+                <!-- ===== بازگشت ===== -->
+                <a href="{% url 'apps.cart:cart_detail' %}"
+                   class="flex items-center justify-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition-colors dark:text-slate-400 dark:hover:text-blue-400">
+                    <i data-lucide="arrow-right" class="size-4"></i>
+                    بازگشت به سبد خرید
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // ===== انتخاب روش ارسال (با رفرش صفحه) =====
+    document.addEventListener('DOMContentLoaded', function () {
+        const shippingRadios = document.querySelectorAll('input[data-shipping]');
+
+        shippingRadios.forEach((radio) => {
+            radio.addEventListener('change', function () {
+                if (this.checked) {
+                    window.location.href = `?shipping=${this.value}`;
+                }
+            });
+        });
+
+        // ===== انتخاب آدرس =====
+        const addressRadios = document.querySelectorAll('input[name="address_id"]');
+
+        // اگر آدرسی انتخاب نشده، اولین رو انتخاب کن
+        const hasChecked = document.querySelector('input[name="address_id"]:checked');
+        if (!hasChecked && addressRadios.length > 0) {
+            addressRadios[0].checked = true;
+        }
+    });
+</script>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,392 @@
+<!-- templates/dashboard/profile.html -->
+{% extends 'base-dashboard.html' %}
+{% load static %}
+
+{% block title %}پروفایل | نکست‌تک{% endblock %}
+
+{% block dashboard_content %}
+
+    <!-- ===== هدر پروفایل ===== -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+         data-aos="fade-up">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800 dark:text-white">پروفایل
+                کاربری</h1>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">اطلاعات شخصی خود
+                را مدیریت کنید</p>
+        </div>
+        <div class="flex items-center gap-3">
+        <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+            <i data-lucide="shield-check" class="inline-block size-3 ml-1"></i>
+            تایید شده
+        </span>
+        </div>
+    </div>
+
+    <!-- ===== آمار ===== -->
+    <div class="grid grid-cols-3 gap-4" data-aos="fade-up" data-aos-delay="50">
+        <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 text-center shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+            <p class="text-2xl font-bold text-slate-800 dark:text-white">{{ total_orders|default:0 }}</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">سفارشات</p>
+        </div>
+        <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 text-center shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+            <p class="text-2xl font-bold text-rose-600 dark:text-rose-400">{{ wishlist_count|default:0 }}</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">علاقه‌مندی‌ها</p>
+        </div>
+        <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 text-center shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+            <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ addresses_count|default:0 }}</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">آدرس‌ها</p>
+        </div>
+    </div>
+
+    <!-- ===== کارت اصلی پروفایل ===== -->
+    <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 md:p-8 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50"
+         data-aos="fade-up" data-aos-delay="100">
+
+        <!-- ===== هدر با آواتار ===== -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-6 pb-6 border-b border-slate-200/50 dark:border-slate-700/50">
+
+            <!-- ===== آواتار با قابلیت آپلود ===== -->
+            <div class="relative inline-block flex-shrink-0">
+                <div class="size-24 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-3xl text-white shadow-lg overflow-hidden">
+                    {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}"
+                             alt="{{ user.get_full_name }}"
+                             class="size-full rounded-full object-cover">
+                    {% else %}
+                        <span>{{ user.get_full_name|slice:":1"|default:user.username|slice:":1" }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- فرم آپلود عکس (hidden) -->
+                <form method="POST" action="{% url 'apps.dashboard:profile' %}"
+                      enctype="multipart/form-data" id="avatar-form" class="hidden">
+                    {% csrf_token %}
+                    <input type="file" name="avatar" id="avatar-input" accept="image/*"
+                           onchange="document.getElementById('avatar-form').submit();">
+                </form>
+
+                <!-- دکمه دوربین -->
+                <label for="avatar-input"
+                       class="absolute bottom-0 left-0 rounded-full bg-blue-600 p-2 text-white shadow-lg hover:bg-blue-700 transition-colors cursor-pointer">
+                    <i data-lucide="camera" class="size-3.5"></i>
+                </label>
+            </div>
+
+            <!-- اطلاعات -->
+            <div class="flex-1 min-w-0">
+                <h2 class="text-xl font-bold text-slate-800 dark:text-white">{{ user.get_full_name|default:user.username }}</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400">
+                    @{{ user.username }}</p>
+                <div class="mt-2 flex flex-wrap items-center gap-3">
+                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+                    <i data-lucide="check-circle" class="size-3"></i>
+                    ایمیل تایید شده
+                </span>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+                    <i data-lucide="check-circle" class="size-3"></i>
+                    تلفن تایید شده
+                </span>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
+                    <i data-lucide="star" class="size-3"></i>
+                    عضویت طلایی
+                </span>
+                </div>
+            </div>
+
+            <!-- دکمه تغییر رمز -->
+            <!-- templates/dashboard/profile.html -->
+            <a href="{% url 'apps.accounts:change_password' %}"
+               class="flex-shrink-0 inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:-translate-y-0.5 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                <i data-lucide="key" class="size-3.5"></i>
+                تغییر رمز عبور
+            </a>
+        </div>
+
+        <!-- ===== فرم اطلاعات شخصی ===== -->
+        <!-- ===== فرم اطلاعات شخصی ===== -->
+        <form method="POST" action="{% url 'apps.dashboard:profile' %}"
+              enctype="multipart/form-data"
+              x-data="{ loading: false }"
+              @submit="loading = true"
+              class="mt-6 space-y-4" novalidate>
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <!-- نام -->
+                <div x-data="{ focused: false }">
+                    <label for="id_first_name"
+                           class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">نام</label>
+                    <div class="relative">
+                        <input type="text" name="first_name" id="id_first_name"
+                               class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+                               :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+                               @focus="focused = true" @blur="focused = false"
+                               placeholder="نام"
+                               value="{{ user.first_name|default:'' }}">
+                        <div class="absolute inset-y-0 right-0 flex items-center pl-2.5 pointer-events-none">
+                            <i data-lucide="user" class="size-3.5 text-slate-400"></i>
+                        </div>
+                    </div>
+                    {% if form.first_name.errors %}
+                        <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ form.first_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- نام خانوادگی -->
+                <div x-data="{ focused: false }">
+                    <label for="id_last_name"
+                           class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">نام
+                        خانوادگی</label>
+                    <div class="relative">
+                        <input type="text" name="last_name" id="id_last_name"
+                               class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+                               :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+                               @focus="focused = true" @blur="focused = false"
+                               placeholder="نام خانوادگی"
+                               value="{{ user.last_name|default:'' }}">
+                        <div class="absolute inset-y-0 right-0 flex items-center pl-2.5 pointer-events-none">
+                            <i data-lucide="user" class="size-3.5 text-slate-400"></i>
+                        </div>
+                    </div>
+                    {% if form.last_name.errors %}
+                        <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ form.last_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- نام کاربری -->
+            <div x-data="{ focused: false }">
+                <label for="id_username"
+                       class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">نام
+                    کاربری</label>
+                <div class="relative">
+                    <input type="text" name="username" id="id_username"
+                           class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+                           :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+                           @focus="focused = true" @blur="focused = false"
+                           placeholder="نام کاربری" value="{{ user.username }}"
+                           readonly>
+                    <div class="absolute inset-y-0 right-0 flex items-center pl-2.5 pointer-events-none">
+                        <i data-lucide="user" class="size-3.5 text-slate-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ایمیل -->
+            <div x-data="{ focused: false }">
+                <label for="id_email"
+                       class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">ایمیل</label>
+                <div class="relative">
+                    <input type="email" name="email" id="id_email"
+                           class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+                           :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+                           @focus="focused = true" @blur="focused = false"
+                           placeholder="ایمیل" value="{{ user.email|default:'' }}">
+                    <div class="absolute inset-y-0 right-0 flex items-center pl-2.5 pointer-events-none">
+                        <i data-lucide="mail" class="size-3.5 text-slate-400"></i>
+                    </div>
+                </div>
+                {% if form.email.errors %}
+                    <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ form.email.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- شماره تلفن -->
+            <div x-data="{ focused: false }">
+                <label for="id_phone"
+                       class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">شماره
+                    تلفن</label>
+                <div class="relative">
+                    <input type="tel" name="phone" id="id_phone"
+                           class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+                           :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+                           @focus="focused = true" @blur="focused = false"
+                           placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+                           value="{{ user.profile.phone|default:'' }}">
+                    <div class="absolute inset-y-0 right-0 flex items-center pl-2.5 pointer-events-none">
+                        <i data-lucide="phone" class="size-3.5 text-slate-400"></i>
+                    </div>
+                </div>
+                {% if form.phone.errors %}
+                    <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ form.phone.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <!-- کد ملی -->
+                <div x-data="{ focused: false }">
+                    <label for="id_national_code"
+                           class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">کد
+                        ملی</label>
+                    <div class="relative">
+                        <input type="text" name="national_code" id="id_national_code"
+                               class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+                               :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+                               @focus="focused = true" @blur="focused = false"
+                               placeholder="کد ملی ده رقمی"
+                               value="{{ user.profile.national_code|default:'' }}">
+                        <div class="absolute inset-y-0 right-0 flex items-center pl-2.5 pointer-events-none">
+                            <i data-lucide="id-card"
+                               class="size-3.5 text-slate-400"></i>
+                        </div>
+                    </div>
+                    {% if form.national_code.errors %}
+                        <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ form.national_code.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- تاریخ تولد -->
+                <div x-data="{ focused: false }">
+                    <label for="id_birth_date"
+                           class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">تاریخ
+                        تولد</label>
+                    <div class="relative">
+                        <input type="text" name="birth_date" id="id_birth_date"
+                               class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+                               :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+                               @focus="focused = true" @blur="focused = false"
+                               placeholder="۱۴۰۰/۰۱/۰۱"
+                               value="{{ user.profile.birth_date|default:'' }}">
+                        <div class="absolute inset-y-0 right-0 flex items-center pl-2.5 pointer-events-none">
+                            <i data-lucide="calendar"
+                               class="size-3.5 text-slate-400"></i>
+                        </div>
+                    </div>
+                    {% if form.birth_date.errors %}
+                        <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ form.birth_date.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- جنسیت -->
+            <div x-data="{ focused: false }">
+                <label for="id_gender"
+                       class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">جنسیت</label>
+                <div class="relative">
+                    <select name="gender" id="id_gender"
+                            class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white appearance-none"
+                            :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+                            @focus="focused = true" @blur="focused = false">
+                        <option value="">انتخاب کنید</option>
+                        <option value="male"
+                                {% if user.profile.gender == 'male' %}selected{% endif %}>
+                            مرد
+                        </option>
+                        <option value="female"
+                                {% if user.profile.gender == 'female' %}selected{% endif %}>
+                            زن
+                        </option>
+                        <option value="other"
+                                {% if user.profile.gender == 'other' %}selected{% endif %}>
+                            سایر
+                        </option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pl-2.5 pointer-events-none">
+                        <i data-lucide="user" class="size-3.5 text-slate-400"></i>
+                    </div>
+                </div>
+                {% if form.gender.errors %}
+                    <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ form.gender.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- ===== دکمه‌ها ===== -->
+            <div class="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
+                <button type="submit"
+                        :disabled="loading"
+                        class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 disabled:opacity-70">
+                    <span x-show="!loading">ذخیره تغییرات</span>
+                    <span x-show="loading" class="flex items-center gap-2">
+                <svg class="size-4 animate-spin" xmlns="http://www.w3.org/2000/svg"
+                     fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                            stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                در حال ذخیره...
+            </span>
+                </button>
+                <a href="{% url 'apps.dashboard:dashboard' %}"
+                   class="rounded-xl border border-slate-300 px-6 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                    انصراف
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- ===== وضعیت حساب ===== -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" data-aos="fade-up"
+         data-aos-delay="150">
+
+        <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">وضعیت
+                حساب</h3>
+            <div class="mt-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-slate-600 dark:text-slate-400">ایمیل</span>
+                    <span class="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400">
+                    <i data-lucide="check-circle" class="size-3.5"></i>
+                    تایید شده
+                </span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-slate-600 dark:text-slate-400">شماره تلفن</span>
+                    <span class="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400">
+                    <i data-lucide="check-circle" class="size-3.5"></i>
+                    تایید شده
+                </span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-slate-600 dark:text-slate-400">سطح عضویت</span>
+                    <span class="text-sm font-medium text-amber-600 dark:text-amber-400">طلایی</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-slate-600 dark:text-slate-400">تاریخ عضویت</span>
+                    <span class="text-sm text-slate-800 dark:text-white">{{ user.date_joined|date:"Y/m/d" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                امنیت</h3>
+            <div class="mt-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-slate-600 dark:text-slate-400">رمز عبور</span>
+                    <a href="#" class="text-sm text-blue-600 hover:underline
+                dark:text-blue-400">
+                        تغییر رمز
+                    </a>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-slate-600 dark:text-slate-400">ورود دو مرحله‌ای</span>
+                    <span class="text-sm text-slate-500 dark:text-slate-400">غیرفعال</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-slate-600 dark:text-slate-400">جلسات فعال</span>
+                    <span class="text-sm text-slate-800 dark:text-white">۱</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-slate-600 dark:text-slate-400">آخرین ورود</span>
+                    <span class="text-sm text-slate-800 dark:text-white">{{ user.last_login|date:"Y/m/d H:i"|default:"-" }}</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,441 @@
+<!-- templates/products/product-list.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}محصولات | نکست‌تک{% endblock %}
+
+{% block content %}
+
+    <!-- ===== هدر صفحه ===== -->
+    <section
+            class="relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-700 py-12 md:py-16"
+            data-aos="fade-down">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute -top-20 -right-20 size-64 rounded-full bg-white/10 blur-3xl"></div>
+            <div class="absolute -bottom-20 -left-20 size-64 rounded-full bg-white/10 blur-3xl"></div>
+        </div>
+        <div class="container max-w-7xl mx-auto px-4 sm:px-6 relative">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <nav class="flex items-center gap-2 text-sm text-blue-200">
+                        <a href="{% url 'apps.core:home' %}"
+                           class="hover:text-white transition-colors">خانه</a>
+                        <i data-lucide="chevron-left" class="size-3.5"></i>
+                        <span class="text-white font-medium">محصولات</span>
+                    </nav>
+                    <h1 class="mt-2 text-2xl md:text-3xl font-bold text-white">
+                        محصولات</h1>
+                    <p class="mt-1 text-sm text-blue-200">{{ paginator.count|default:products|length }}
+                        محصول</p>
+                </div>
+                <div class="flex items-center gap-3">
+                <span class="rounded-full bg-white/20 px-4 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
+                    جدیدترین محصولات
+                </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== محتوای اصلی ===== -->
+    <div class="container max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+
+        <div class="flex flex-col lg:flex-row gap-6">
+
+            <!-- ===== سایدبار (دسکتاپ) ===== -->
+            <aside class="lg:w-72 flex-shrink-0 space-y-4" data-aos="fade-left"
+                   data-aos-delay="50">
+
+                <!-- ===== جستجو ===== -->
+                <form method="GET" action="{% url 'apps.products:product_list' %}"
+                      class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                    <div class="relative">
+                        <input type="text" name="q" placeholder="جستجوی محصول..."
+                               value="{{ search_query|default:'' }}"
+                               class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500">
+                        <button type="submit"
+                                class="absolute inset-y-0 right-0 flex items-center pl-3 pointer-events-none">
+                            <i data-lucide="search" class="size-4 text-slate-400"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- ===== فیلتر دسته‌بندی ===== -->
+                <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-slate-800 dark:text-white">
+                            دسته‌بندی‌ها</h3>
+                        <a href="{% url 'apps.products:category_list' %}"
+                           class="text-xs text-blue-600 hover:underline dark:text-blue-400">مشاهده
+                            همه</a>
+                    </div>
+                    <ul class="mt-3 space-y-1.5">
+                        {% for category in categories|slice:":6" %}
+                            <li>
+                                <a href="{% url 'apps.products:product_list' %}?category={{ category.slug }}"
+                                   class="flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-all hover:bg-slate-100 dark:hover:bg-slate-800 {% if selected_category == category.slug %}bg-blue-50 dark:bg-blue-950/20{% endif %}">
+                                    <span class="text-slate-600 dark:text-slate-400">{{ category.name }}</span>
+                                    <span class="text-xs text-slate-400 dark:text-slate-500">{{ category.products_count|default:"۰" }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- ===== فیلتر برند ===== -->
+                <form method="GET" action="{% url 'apps.products:product_list' %}"
+                      class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-slate-800 dark:text-white">
+                            دسته‌بندی‌ها</h3>
+                        <a href="{% url 'apps.products:brand_list' %}"
+                           class="text-xs text-blue-600 hover:underline dark:text-blue-400">مشاهده
+                            همه</a>
+                    </div>
+
+                    <div class="mt-3 space-y-1.5">
+                        {% for brand in brands|slice:":5" %}
+                            <label class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+                                <input type="checkbox" name="brand"
+                                       value="{{ brand.slug }}"
+                                       {% if brand.slug in selected_brands %}checked{% endif %}
+                                       class="size-3.5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-800"
+                                       onchange="this.closest('form').submit();">
+                                <span class="text-slate-600 dark:text-slate-400">{{ brand.name }}</span>
+                                <span class="mr-auto text-xs text-slate-400 dark:text-slate-500">{{ brand.products_count|default:"۰" }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                    {% if request.GET.brand %}
+                        <a href="{% url 'apps.products:product_list' %}"
+                           class="mt-2 inline-block text-xs text-blue-600 hover:underline dark:text-blue-400">حذف
+                            فیلتر</a>
+                    {% endif %}
+                </form>
+
+                <!-- ===== محدوده قیمت ===== -->
+                <form method="GET" action="{% url 'apps.products:product_list' %}"
+                      class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                    <h3 class="text-sm font-bold text-slate-800 dark:text-white">محدوده
+                        قیمت</h3>
+                    <div class="mt-3 space-y-3">
+                        <div class="flex items-center gap-3">
+                            <input type="number" name="min_price" placeholder="از"
+                                   value="{{ request.GET.min_price|default:'' }}"
+                                   class="w-full rounded-xl border bg-white/50 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500">
+                            <span class="text-sm text-slate-400">تا</span>
+                            <input type="number" name="max_price" placeholder="تا"
+                                   value="{{ request.GET.max_price|default:'' }}"
+                                   class="w-full rounded-xl border bg-white/50 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500">
+                        </div>
+                        <button type="submit"
+                                class="w-full rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700">
+                            اعمال فیلتر
+                        </button>
+                    </div>
+                </form>
+
+                <!-- ===== فیلترهای دیگر ===== -->
+                <form method="GET" action="{% url 'apps.products:product_list' %}"
+                      class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                    <h3 class="text-sm font-bold text-slate-800 dark:text-white">
+                        فیلترهای دیگر</h3>
+                    <div class="mt-3 space-y-2">
+                        <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
+                            <input type="checkbox" name="in_stock" value="true"
+                                   {% if request.GET.in_stock %}checked{% endif %}
+                                   class="size-3.5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-800"
+                                   onchange="this.closest('form').submit();">
+                            فقط کالاهای موجود
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
+                            <input type="checkbox" name="has_discount" value="true"
+                                   {% if request.GET.has_discount %}checked{% endif %}
+                                   class="size-3.5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-800"
+                                   onchange="this.closest('form').submit();">
+                            فقط کالاهای تخفیف‌دار
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
+                            <input type="checkbox" name="has_warranty" value="true"
+                                   {% if request.GET.has_warranty %}checked{% endif %}
+                                   class="size-3.5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-800"
+                                   onchange="this.closest('form').submit();">
+                            دارای گارانتی
+                        </label>
+                    </div>
+                    {% if request.GET.in_stock or request.GET.has_discount or request.GET.has_warranty %}
+                        <a href="{% url 'apps.products:product_list' %}"
+                           class="mt-2 inline-block text-xs text-blue-600 hover:underline dark:text-blue-400">حذف
+                            فیلترها</a>
+                    {% endif %}
+                </form>
+
+            </aside>
+
+            <!-- ===== لیست محصولات ===== -->
+            <div class="flex-1 min-w-0">
+
+                <!-- ===== نوار ابزار ===== -->
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-6"
+                     data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-slate-500 dark:text-slate-400">{{ paginator.count}} محصول</span>
+                        <button class="lg:hidden rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                            <i data-lucide="sliders-horizontal" class="size-5"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <form method="GET"
+                              action="{% url 'apps.products:product_list' %}"
+                              id="sort-form">
+                            {% for key, value in request.GET.items %}
+                                {% if key != 'sort' %}
+                                    <input type="hidden" name="{{ key }}"
+                                           value="{{ value }}">
+                                {% endif %}
+                            {% endfor %}
+                            <select name="sort"
+                                    class="rounded-xl border bg-white/50 px-4 py-2 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white"
+                                    onchange="this.closest('form').submit();">
+                                <option value="-created_at"
+                                        {% if sort_by == '-created_at' %}selected{% endif %}>
+                                    جدیدترین
+                                </option>
+                                <option value="-price"
+                                        {% if sort_by == '-price' %}selected{% endif %}>
+                                    گران‌ترین
+                                </option>
+                                <option value="price"
+                                        {% if sort_by == 'price' %}selected{% endif %}>
+                                    ارزان‌ترین
+                                </option>
+                                <option value="name"
+                                        {% if sort_by == 'name' %}selected{% endif %}>
+                                    الفبا
+                                </option>
+                                <option value="-rating"
+                                        {% if sort_by == '-rating' %}selected{% endif %}>
+                                    بالاترین امتیاز
+                                </option>
+                            </select>
+                        </form>
+                        <div class="hidden sm:flex items-center gap-1 border-r border-slate-200 pr-2 dark:border-slate-700">
+                            <button class="rounded-lg bg-blue-600 p-2 text-white transition-colors"
+                                    aria-label="نمایش شبکه‌ای">
+                                <i data-lucide="grid-2x2" class="size-4"></i>
+                            </button>
+                            <button class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                                    aria-label="نمایش لیستی">
+                                <i data-lucide="list" class="size-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== محصولات ===== -->
+                {% if products %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6"
+                         data-aos="fade-up" data-aos-delay="150">
+
+                        {% for product in products %}
+                            <div class="group relative rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-blue-400 dark:bg-slate-900/80 dark:border-slate-800/50 dark:hover:border-blue-600/50">
+
+                                <!-- ===== تصویر ===== -->
+                                <div class="relative overflow-hidden rounded-t-2xl bg-slate-100 dark:bg-slate-800">
+                                    <div class="aspect-square">
+                                        {% if product.image %}
+                                            <img src="{{ product.image.url }}"
+                                                 alt="{{ product.name }}"
+                                                 class="size-full object-cover transition-transform duration-700 group-hover:scale-105">
+                                        {% else %}
+                                            <div class="size-full flex items-center justify-center text-slate-400 dark:text-slate-600">
+                                                <i data-lucide="image"
+                                                   class="size-12"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- برچسب تخفیف -->
+                                    {% if product.discount_price %}
+                                        <div class="absolute top-3 right-3 rounded-full bg-rose-500 px-2.5 py-0.5 text-[10px] font-bold text-white">
+                                            {% if product.discount_price %}
+                                                <span>
+                                                    {{ product.get_discount_percent }}%
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- ===== دکمه‌های هاور ===== -->
+                                    <div class="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+
+                                        <!-- ===== ۱. مشاهده سریع ===== -->
+                                        <a href="{% url 'apps.products:product_detail' product.id %}"
+                                           class="rounded-full bg-white p-2.5 text-slate-700 transition-all hover:scale-110 hover:bg-blue-600 hover:text-white"
+                                           aria-label="مشاهده سریع">
+                                            <i data-lucide="eye" class="size-4"></i>
+                                        </a>
+
+                                        <!-- ===== ۲. افزودن به علاقه‌مندی‌ها ===== -->
+                                        <form method="POST"
+                                              action="{% url 'apps.products:add_to_wishlist' product.id %}"
+                                              class="inline-block">
+                                            {% csrf_token %}
+                                            <button type="submit"
+                                                    class="rounded-full bg-white p-2.5 text-slate-700 transition-all hover:scale-110 hover:bg-rose-600 hover:text-white"
+                                                    aria-label="افزودن به علاقه‌مندی‌ها">
+                                                <i data-lucide="heart"
+                                                   class="size-4"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- ===== ۳. مقایسه (placeholder) ===== -->
+                                        <button class="rounded-full bg-white p-2.5 text-slate-700 transition-all hover:scale-110 hover:bg-blue-600 hover:text-white"
+                                                aria-label="مقایسه"
+                                                onclick="alert('قابلیت مقایسه به زودی اضافه می‌شود!')">
+                                            <i data-lucide="git-compare"
+                                               class="size-4"></i>
+                                        </button>
+
+                                    </div>
+
+                                    <!-- وضعیت موجودی -->
+                                    <div class="absolute bottom-3 right-3">
+                                        {% if product.stock > 0 %}
+                                            <span class="rounded-full bg-emerald-500/90 px-2.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+                                        موجود
+                                    </span>
+                                        {% else %}
+                                            <span class="rounded-full bg-rose-500/90 px-2.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+                                        ناموجود
+                                    </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- ===== اطلاعات محصول ===== -->
+                                <div class="p-4 space-y-2">
+
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs text-slate-500 dark:text-slate-400">{{ product.category.name|default:"دسته‌بندی" }}</p>
+                                            <a href="
+{% url 'apps.products:product_detail' product.id %}"
+                                               class="block">
+                                                <h3 class="mt-0.5 text-sm font-semibold text-slate-800 dark:text-white line-clamp-1 hover:text-blue-600 transition-colors">
+                                                    {{ product.name }}
+                                                </h3>
+                                            </a>
+                                            {% if product.brand %}
+                                                <p class="text-xs text-slate-500 dark:text-slate-400">{{ product.brand.name }}</p>
+                                            {% endif %}
+                                        </div>
+                                        {% if product.warranty %}
+                                            <span class="flex-shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-[9px] font-medium text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+                                        گارانتی
+                                    </span>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- امتیاز -->
+                                    <div class="flex items-center gap-2">
+                                        <div class="flex items-center text-amber-400">
+                                            {% with avg=product.average_rating|default:0 %}
+                                                {% for i in "12345"|make_list %}
+                                                    {% if forloop.counter <= avg %}
+                                                        <i data-lucide="star"
+                                                           class="size-3.5 fill-amber-400"></i>
+                                                    {% else %}
+                                                        <i data-lucide="star"
+                                                           class="size-3.5 text-slate-300 dark:text-slate-600"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endwith %}
+                                        </div>
+                                        <span class="text-xs text-slate-400 dark:text-slate-500">({{ product.reviews_count|default:0 }})</span>
+                                    </div>
+
+                                    <!-- قیمت -->
+                                    <div class="flex items-center gap-2">
+                                        {% if product.discount_price %}
+                                            <span class="text-sm text-slate-400
+                                            line-through">
+                                                {{ product.price|floatformat:0|intcomma:"False" }}</span>
+                                            <span class="text-lg font-bold
+                                            text-blue-600 dark:text-blue-400">
+                                                {{ product.discount_price|floatformat:0|intcomma:"False" }}</span>
+                                        {% else %}
+                                            <span class="text-lg font-bold
+                                            text-slate-800 dark:text-white">
+                                                {{ product.price|floatformat:0|intcomma }}</span>
+                                        {% endif %}
+                                        <span class="text-xs text-slate-400">تومان</span>
+
+                                    </div>
+
+                                    <!-- دکمه افزودن به سبد خرید -->
+                                    <form method="POST"
+                                          action="{% url 'apps.cart:add_to_cart' product.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit"
+                                                class="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/20"
+                                                {% if not product.is_in_stock %}disabled{% endif %}>
+                                            <i data-lucide="shopping-cart"
+                                               class="size-4"></i>
+                                            {% if product.is_in_stock %}
+                                                افزودن به سبد خرید
+                                            {% else %}
+                                                ناموجود
+                                            {% endif %}
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
+                    <!-- ===== صفحه‌بندی ===== -->
+                    {% if is_paginated %}
+                        <div class="mt-8" data-aos="fade-up" data-aos-delay="200">
+                            {% include 'partials/pagination.html' with page_obj=page_obj query_params=query_params %}
+                        </div>
+                    {% endif %}
+
+                {% else %}
+                    <!-- ===== حالت خالی ===== -->
+                    <div class="flex flex-col items-center justify-center rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-12 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50 text-center">
+                        <div class="size-24 rounded-full bg-slate-100 flex items-center justify-center dark:bg-slate-800">
+                            <i data-lucide="package" class="size-12 text-slate-400"></i>
+                        </div>
+                        <h3 class="mt-4 text-xl font-bold text-slate-800 dark:text-white">
+                            هیچ محصولی پیدا نشد</h3>
+                        <p class="mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
+                            با فیلترهای مختلف جستجو کنید یا دسته‌بندی دیگری را امتحان
+                            کنید.
+                        </p>
+                        <a href="{% url 'apps.products:product_list' %}"
+                           class="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40">
+                            <i data-lucide="refresh" class="size-4"></i>
+                            حذف فیلترها
+                        </a>
+                    </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+{% endblock %}

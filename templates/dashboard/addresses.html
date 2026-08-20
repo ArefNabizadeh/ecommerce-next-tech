@@ -1,0 +1,370 @@
+<!-- templates/dashboard/addresses.html -->
+{% extends 'base-dashboard.html' %}
+{% load static %}
+
+{% block title %}آدرس‌های من | نکست‌تک{% endblock %}
+
+{% block dashboard_content %}
+
+<div
+    x-data="{
+        openAddModal: false,
+        openEditModal: false,
+        openDeleteModal: false,
+        deleteId: null,
+        editId: null,
+        editForm: {
+            recipient_name: '',
+            phone: '',
+            province: '',
+            city: '',
+            street_address: '',
+            postal_code: '',
+            unit: '',
+            delivery_notes: '',
+            is_default: false
+        },
+        init() {
+            // ===== توابع سراسری برای فراخوانی از دکمه‌ها =====
+            window.openAddModal = () => {
+                this.openAddModal = true;
+                document.body.classList.add('overflow-hidden');
+            };
+            window.openEditModal = (id, data) => {
+                this.editId = id;
+                this.editForm = {
+                    recipient_name: data.recipient_name || '',
+                    phone: data.phone || '',
+                    province: data.province || '',
+                    city: data.city || '',
+                    street_address: data.street_address || '',
+                    postal_code: data.postal_code || '',
+                    unit: data.unit || '',
+                    delivery_notes: data.delivery_notes || '',
+                    is_default: data.is_default || false
+                };
+                this.openEditModal = true;
+                document.body.classList.add('overflow-hidden');
+            };
+            window.openDeleteModal = (id) => {
+                this.deleteId = id;
+                this.openDeleteModal = true;
+                document.body.classList.add('overflow-hidden');
+            };
+            window.closeModals = () => {
+                this.openAddModal = false;
+                this.openEditModal = false;
+                this.openDeleteModal = false;
+                document.body.classList.remove('overflow-hidden');
+            };
+        },
+        closeModal() {
+            this.openAddModal = false;
+            this.openEditModal = false;
+            this.openDeleteModal = false;
+            document.body.classList.remove('overflow-hidden');
+        }
+    }"
+    x-init="init()"
+>
+    <!-- ===== هدر صفحه ===== -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" data-aos="fade-up">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800 dark:text-white">آدرس‌های من</h1>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">مدیریت آدرس‌های تحویل سفارشات</p>
+        </div>
+        <button
+            @click="window.openAddModal()"
+            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40"
+        >
+            <i data-lucide="plus" class="size-4"></i>
+            افزودن آدرس جدید
+        </button>
+    </div>
+
+    <!-- ===== لیست آدرس‌ها ===== -->
+    {% if addresses %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" data-aos="fade-up" data-aos-delay="100">
+            {% for address in addresses %}
+                <div class="relative rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/10 dark:bg-slate-900/80 dark:border-slate-800/50 dark:hover:border-blue-600/50">
+
+                    <!-- برچسب پیش‌فرض -->
+                    {% if address.is_default %}
+                        <div class="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">
+                            <i data-lucide="check" class="size-3"></i>
+                            پیش‌فرض
+                        </div>
+                    {% endif %}
+
+                    <!-- اطلاعات آدرس -->
+                    <div class="space-y-2.5">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="font-semibold text-slate-800 dark:text-white">{{ address.recipient_name }}</p>
+                                <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                                    <i data-lucide="phone" class="size-3.5"></i>
+                                    {{ address.phone }}
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button @click="window.openEditModal('{{ address.id }}', {
+                                    recipient_name: '{{ address.recipient_name|escapejs }}',
+                                    phone: '{{ address.phone }}',
+                                    province: '{{ address.province|escapejs }}',
+                                    city: '{{ address.city|escapejs }}',
+                                    street_address: '{{ address.street_address|escapejs }}',
+                                    postal_code: '{{ address.postal_code }}',
+                                    unit: '{{ address.unit|escapejs }}',
+                                    delivery_notes: '{{ address.delivery_notes|escapejs }}',
+                                    is_default: {{ address.is_default|yesno:"true,false" }}
+                                })" class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400" aria-label="ویرایش">
+                                    <i data-lucide="edit" class="size-4"></i>
+                                </button>
+                                <button @click="window.openDeleteModal('{{ address.id }}')" class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-rose-600 dark:hover:bg-slate-800 dark:hover:text-rose-400" aria-label="حذف">
+                                    <i data-lucide="trash-2" class="size-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5 text-sm text-slate-600 dark:text-slate-400">
+                            {% if address.province %}
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="map-pin" class="size-3.5 text-slate-400"></i>
+                                    <span>{{ address.province }}{% if address.city %}، {{ address.city }}{% endif %}</span>
+                                </div>
+                            {% endif %}
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="home" class="size-3.5 text-slate-400"></i>
+                                <span>{{ address.street_address }}</span>
+                            </div>
+                            {% if address.postal_code %}
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="navigation" class="size-3.5 text-slate-400"></i>
+                                    <span>کد پستی: {{ address.postal_code }}</span>
+                                </div>
+                            {% endif %}
+                            {% if address.unit %}
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="building" class="size-3.5 text-slate-400"></i>
+                                    <span>واحد: {{ address.unit }}</span>
+                                </div>
+                            {% endif %}
+                            {% if address.delivery_notes %}
+                                <div class="flex items-start gap-2 text-xs text-slate-400 dark:text-slate-500">
+                                    <i data-lucide="edit" class="size-3.5 mt-0.5"></i>
+                                    <span>📝 {{ address.delivery_notes }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- دکمه تنظیم به عنوان پیش‌فرض -->
+                    {% if not address.is_default %}
+                        <div class="mt-4 pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
+                            <form method="POST" action="{% url 'apps.dashboard:set_default_address' address.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50">
+                                    <i data-lucide="check" class="size-3.5"></i>
+                                    تنظیم به عنوان آدرس پیش‌فرض
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- ===== حالت خالی ===== -->
+        <div class="flex flex-col items-center justify-center rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-12 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50 text-center" data-aos="fade-up" data-aos-delay="100">
+            <div class="size-24 rounded-full bg-slate-100 flex items-center justify-center dark:bg-slate-800">
+                <i data-lucide="map-pin" class="size-12 text-slate-400"></i>
+            </div>
+            <h3 class="mt-4 text-xl font-bold text-slate-800 dark:text-white">هنوز آدرسی ثبت نکرده‌اید</h3>
+            <p class="mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
+                برای دریافت سفارشات خود، اولین آدرس خود را اضافه کنید.
+            </p>
+            <button
+                @click="window.openAddModal()"
+                class="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40"
+            >
+                <i data-lucide="plus" class="size-4"></i>
+                افزودن آدرس جدید
+            </button>
+        </div>
+    {% endif %}
+
+    <!-- ======================================== -->
+    <!-- ===== مودال افزودن آدرس ===== -->
+    <!-- ======================================== -->
+    <div
+        x-show="openAddModal"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm flex items-start justify-center overflow-y-auto py-10 px-4"
+        @click.self="closeModal()"
+        @keydown.escape="closeModal()"
+    >
+        <div
+            x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="scale-95 opacity-0 translate-y-8"
+            x-transition:enter-end="scale-100 opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200 transform"
+            x-transition:leave-start="scale-100 opacity-100 translate-y-0"
+            x-transition:leave-end="scale-95 opacity-0 translate-y-8"
+            class="my-auto w-full max-w-lg rounded-3xl bg-white p-6 md:p-8 shadow-2xl dark:bg-slate-900"
+        >
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-white">افزودن آدرس جدید</h2>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">اطلاعات آدرس تحویل خود را وارد کنید</p>
+                </div>
+                <button @click="closeModal()" class="rounded-full p-2 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="x" class="size-5 text-slate-500"></i>
+                </button>
+            </div>
+
+            <form method="POST" action="{% url 'apps.dashboard:add_address' %}"
+                  x-data="{ loading: false }"
+                  @submit="loading = true"
+                  class="space-y-4" novalidate>
+                {% csrf_token %}
+                {% include 'dashboard/partials/address_form_fields.html' %}
+                <div class="flex flex-wrap items-center gap-3 pt-4">
+                    <button type="submit"
+                        :disabled="loading"
+                        class="flex-1 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 disabled:opacity-70">
+                        <span x-show="!loading">ذخیره آدرس</span>
+                        <span x-show="loading" class="flex items-center justify-center gap-2">
+                            <svg class="size-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            در حال ذخیره...
+                        </span>
+                    </button>
+                    <button type="button" @click="closeModal()" class="rounded-xl border border-slate-300 px-6 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                        انصراف
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== مودال ویرایش آدرس ===== -->
+    <div
+        x-show="openEditModal"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm flex items-start justify-center overflow-y-auto py-10 px-4"
+        @click.self="closeModal()"
+        @keydown.escape="closeModal()"
+    >
+        <div
+            x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="scale-95 opacity-0 translate-y-8"
+            x-transition:enter-end="scale-100 opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200 transform"
+            x-transition:leave-start="scale-100 opacity-100 translate-y-0"
+            x-transition:leave-end="scale-95 opacity-0 translate-y-8"
+            class="my-auto w-full max-w-lg rounded-3xl bg-white p-6 md:p-8 shadow-2xl dark:bg-slate-900"
+        >
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-white">ویرایش آدرس</h2>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">اطلاعات آدرس خود را ویرایش کنید</p>
+                </div>
+                <button @click="closeModal()" class="rounded-full p-2 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="x" class="size-5 text-slate-500"></i>
+                </button>
+            </div>
+
+            <form method="POST" :action="`{% url 'apps.dashboard:edit_address' 0 %}`.replace('0', editId)"
+                  x-data="{ loading: false }"
+                  @submit="loading = true"
+                  class="space-y-4" novalidate>
+                {% csrf_token %}
+                {% include 'dashboard/partials/address_form_fields.html' with is_edit=True %}
+                <div class="flex flex-wrap items-center gap-3 pt-4">
+                    <button type="submit"
+                        :disabled="loading"
+                        class="flex-1 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 disabled:opacity-70">
+                        <span x-show="!loading">ذخیره تغییرات</span>
+                        <span x-show="loading" class="flex items-center justify-center gap-2">
+                            <svg class="size-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            در حال ذخیره...
+                        </span>
+                    </button>
+                    <button type="button" @click="closeModal()" class="rounded-xl border border-slate-300 px-6 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                        انصراف
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== مودال حذف آدرس ===== -->
+    <div
+        x-show="openDeleteModal"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+        @click.self="closeModal()"
+        @keydown.escape="closeModal()"
+    >
+        <div
+            x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="scale-95 opacity-0 translate-y-8"
+            x-transition:enter-end="scale-100 opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200 transform"
+            x-transition:leave-start="scale-100 opacity-100 translate-y-0"
+            x-transition:leave-end="scale-95 opacity-0 translate-y-8"
+            class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900 text-center"
+        >
+            <div class="size-16 rounded-full bg-rose-100 flex items-center justify-center mx-auto dark:bg-rose-950/30">
+                <i data-lucide="alert-triangle" class="size-8 text-rose-600 dark:text-rose-400"></i>
+            </div>
+
+            <h3 class="mt-4 text-xl font-bold text-slate-800 dark:text-white">حذف آدرس</h3>
+            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                آیا از حذف این آدرس اطمینان دارید؟ این عمل قابل بازگشت نیست.
+            </p>
+
+            <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <form method="POST" :action="`{% url 'apps.dashboard:delete_address' 0 %}`.replace('0', deleteId)">
+                    {% csrf_token %}
+                    <button type="submit" class="rounded-xl bg-rose-600 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-rose-700">
+                        حذف
+                    </button>
+                </form>
+                <button @click="closeModal()" class="rounded-xl border border-slate-300 px-6 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                    انصراف
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+    });
+</script>
+{% endblock %}

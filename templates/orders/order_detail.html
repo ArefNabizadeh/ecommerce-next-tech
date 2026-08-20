@@ -1,0 +1,577 @@
+<!-- templates/orders/order-detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}جزئیات سفارش | نکست‌تک{% endblock %}
+
+{% block content %}
+
+    <div class="container max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+
+        <!-- ===== هدر صفحه ===== -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8"
+             data-aos="fade-up">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white">
+                        سفارش #{{ order.order_number }}
+                    </h1>
+                    <span class="rounded-full px-3 py-1 text-xs font-medium
+                    {% if order.status == 'pending' %}bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400
+                    {% elif order.status == 'processing' %}bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400
+                    {% elif order.status == 'shipped' %}bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400
+                    {% elif order.status == 'delivered' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400
+                    {% elif order.status == 'cancelled' %}bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400
+                    {% else %}bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400{% endif %}">
+                    {{ order.get_status_display }}
+                </span>
+                </div>
+                <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
+                    <span>تاریخ ثبت: {{ order.created_at|date:"Y/m/d" }}</span>
+                    {% if order.tracking_code %}
+                        <span>کد رهگیری: {{ order.tracking_code }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{% url 'apps.orders:order_list' %}"
+                   class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                    <i data-lucide="arrow-right" class="size-4"></i>
+                    بازگشت
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- ===== ستون سمت چپ ===== -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- ===== تایم‌لاین ===== -->
+                <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50"
+                     data-aos="fade-up" data-aos-delay="50">
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <i data-lucide="clock" class="size-5 text-blue-600"></i>
+                        وضعیت سفارش
+                    </h2>
+
+                    <div class="mt-6 relative">
+                        <!-- خط عمودی -->
+                        <div class="absolute right-3 top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-700"></div>
+
+                        <div class="space-y-6 relative">
+                            <!-- مرحله ۱ -->
+                            <div class="flex items-start gap-4">
+                                <div class="relative z-10 flex items-center justify-center size-6 rounded-full bg-emerald-500 text-white">
+                                    <i data-lucide="check" class="size-3.5"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-slate-800 dark:text-white">
+                                        ثبت سفارش</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ order.created_at|date:"Y/m/d H:i" }}</p>
+                                </div>
+                            </div>
+
+                            <!-- مرحله ۲ -->
+                            <div class="flex items-start gap-4">
+                                <div class="relative z-10 flex items-center justify-center size-6 rounded-full
+                                {% if order.payment_status == 'paid' %}bg-emerald-500 text-white{% else %}bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500{% endif %}">
+                                    {% if order.payment_status == 'paid' %}
+                                        <i data-lucide="check" class="size-3.5"></i>
+                                    {% else %}
+                                        <span class="size-2 rounded-full bg-slate-400 dark:bg-slate-500"></span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-slate-800 dark:text-white">
+                                        پرداخت</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                                        {% if order.payment_status == 'paid' %}تایید
+                                            شده{% else %}در انتظار{% endif %}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- مرحله ۳ -->
+                            <div class="flex items-start gap-4">
+                                <div class="relative z-10 flex items-center justify-center size-6 rounded-full
+                                {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}bg-emerald-500 text-white{% else %}bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500{% endif %}">
+                                    {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}
+                                        <i data-lucide="check" class="size-3.5"></i>
+                                    {% else %}
+                                        <span class="size-2 rounded-full bg-slate-400 dark:bg-slate-500"></span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-slate-800 dark:text-white">
+                                        آماده‌سازی</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                                        {% if order.status == 'pending' %}در
+                                            انتظار{% else %}تکمیل شده{% endif %}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- مرحله ۴ -->
+                            <div class="flex items-start gap-4">
+                                <div class="relative z-10 flex items-center justify-center size-6 rounded-full
+                                {% if order.status == 'shipped' or order.status == 'delivered' %}bg-emerald-500 text-white{% else %}bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500{% endif %}">
+                                    {% if order.status == 'shipped' or order.status == 'delivered' %}
+                                        <i data-lucide="check" class="size-3.5"></i>
+                                    {% else %}
+                                        <span class="size-2 rounded-full bg-slate-400 dark:bg-slate-500"></span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-slate-800 dark:text-white">
+                                        ارسال</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                                        {% if order.status == 'pending' or order.status == 'processing' %}
+                                            در انتظار
+                                        {% elif order.status == 'shipped' %}
+                                            در حال ارسال
+                                        {% elif order.status == 'delivered' %}
+                                            تحویل داده شده
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- مرحله ۵ -->
+                            <div class="flex items-start gap-4">
+                                <div class="relative z-10 flex items-center justify-center size-6 rounded-full
+                                {% if order.status == 'delivered' %}bg-emerald-500 text-white{% else %}bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500{% endif %}">
+                                    {% if order.status == 'delivered' %}
+                                        <i data-lucide="check" class="size-3.5"></i>
+                                    {% else %}
+                                        <span class="size-2 rounded-full bg-slate-400 dark:bg-slate-500"></span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-slate-800 dark:text-white">
+                                        تحویل</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                                        {% if order.status == 'delivered' %}
+                                            تحویل داده شده
+                                        {% else %}
+                                            در انتظار
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== لیست محصولات با امکان ثبت نظر ===== -->
+                <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50"
+                     data-aos="fade-up" data-aos-delay="100">
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <i data-lucide="shopping-bag" class="size-5 text-blue-600"></i>
+                        محصولات سفارش
+                    </h2>
+
+                    <div class="mt-4 divide-y divide-slate-200/50 dark:divide-slate-700/50">
+                        {% for item in order_items %}
+                            <div class="py-4 first:pt-0 last:pb-0">
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                                        <div class="size-16 rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden flex-shrink-0">
+                                            {% if item.product.image %}
+                                                <img src="{{ item.product.image.url }}"
+                                                     alt="{{ item.product.name }}"
+                                                     class="size-full object-cover">
+                                            {% else %}
+                                                <div class="size-full flex items-center justify-center text-slate-400">
+                                                    <i data-lucide="image"
+                                                       class="size-6"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-semibold text-slate-800 dark:text-white truncate">{{ item.product.name }}</p>
+                                            <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-slate-500 dark:text-slate-400">
+                                                {% if item.product.brand %}
+                                                    <span>{{ item.product.brand.name }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap items-center justify-between sm:justify-end gap-3 sm:gap-6">
+                                        <span class="text-sm text-slate-600 dark:text-slate-400">x{{ item.quantity }}</span>
+                                        <span class="text-sm font-bold text-slate-800 dark:text-white">{{ item.price|floatformat:0 }} تومان</span>
+                                    </div>
+                                </div>
+
+                                <!-- ===== دکمه ثبت نظر ===== -->
+                                <div class="mt-3">
+                                    {% if order.status == 'delivered' or order.status == 'shipped' %}
+                                        {% if item.product.id in reviewed_products %}
+                                            <span class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-100 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+                                            <i data-lucide="check-circle"
+                                               class="size-3.5"></i>
+                                            نظر شما ثبت شده است
+                                        </span>
+                                        {% else %}
+                                            <button onclick="openReviewModal('{{ item.product.id }}', '{{ item.product.name }}')"
+                                                    class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-1.5 text-xs font-medium text-white transition-all hover:bg-blue-700">
+                                                <i data-lucide="star"
+                                                   class="size-3.5"></i>
+                                                ثبت نظر برای این محصول
+                                            </button>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-xs text-slate-400 dark:text-slate-500">
+                                        <i data-lucide="clock"
+                                           class="size-3.5 inline-block ml-1"></i>
+                                        پس از تحویل سفارش می‌توانید نظر دهید
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- ===== یادداشت سفارش ===== -->
+                {% if order.note %}
+                    <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50"
+                         data-aos="fade-up" data-aos-delay="150">
+                        <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                            <i data-lucide="edit" class="size-5 text-blue-600"></i>
+                            یادداشت سفارش
+                        </h2>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">{{ order.note }}</p>
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <!-- ===== ستون سمت راست ===== -->
+            <div class="lg:col-span-1 space-y-6">
+
+                <!-- ===== خلاصه پرداخت ===== -->
+                <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50"
+                     data-aos="fade-up" data-aos-delay="100">
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <i data-lucide="credit-card" class="size-5 text-blue-600"></i>
+                        خلاصه پرداخت
+                    </h2>
+
+                    <div class="mt-4 space-y-2">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-slate-500 dark:text-slate-400">جمع کل</span>
+                            <span class="font-medium text-slate-800 dark:text-white">{{ order.subtotal|floatformat:0|default:0 }} تومان</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-slate-500 dark:text-slate-400">تخفیف</span>
+                            <span class="font-medium text-rose-600 dark:text-rose-400">-{{ order.discount|floatformat:0|default:0 }} تومان</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-slate-500 dark:text-slate-400">هزینه ارسال</span>
+                            <span class="font-medium text-slate-800 dark:text-white">
+                            {{ order.shipping_cost|floatformat:0|default:0 }} تومان
+                            <span class="text-xs text-slate-400">({{ order.get_shipping_method_display }})</span>
+                        </span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-slate-500 dark:text-slate-400">مالیات</span>
+                            <span class="font-medium text-slate-800 dark:text-white">{{ order.tax|floatformat:0|default:0 }} تومان</span>
+                        </div>
+
+                        <!-- ===== زمان تحویل ===== -->
+                        <div class="flex items-center justify-between text-sm bg-blue-50 dark:bg-blue-950/20 p-2 rounded-lg">
+                        <span class="text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                            <i data-lucide="clock" class="size-3.5"></i>
+                            زمان تحویل
+                        </span>
+                            <span class="font-medium text-blue-700 dark:text-blue-300">{{ order.expected_delivery }}</span>
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-200/50 dark:border-slate-700/50">
+                            <div class="flex items-center justify-between">
+                                <span class="text-base font-bold text-slate-800 dark:text-white">قابل پرداخت</span>
+                                <span class="text-xl font-bold text-blue-600 dark:text-blue-400">{{ order.total_price|floatformat:0 }} تومان</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 flex items-center justify-between text-sm">
+                            <span class="text-slate-500 dark:text-slate-400">روش پرداخت</span>
+                            <span class="font-medium text-slate-800 dark:text-white">{{ order.get_payment_method_display|default:"آنلاین" }}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-slate-500 dark:text-slate-400">وضعیت پرداخت</span>
+                            <span class="rounded-full px-2.5 py-0.5 text-[10px] font-medium
+                            {% if order.payment_status == 'paid' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400
+                            {% elif order.payment_status == 'pending' %}bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400
+                            {% elif order.payment_status == 'failed' %}bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400
+                            {% else %}bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400{% endif %}">
+                            {{ order.get_payment_status_display }}
+                        </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== آدرس ارسال ===== -->
+                <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50"
+                     data-aos="fade-up" data-aos-delay="150">
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <i data-lucide="map-pin" class="size-5 text-blue-600"></i>
+                        آدرس ارسال
+                    </h2>
+
+                    <div class="mt-4 space-y-1.5 text-sm">
+                        <p class="font-medium text-slate-800 dark:text-white">{{ order.user.get_full_name|default:order.user.username }}</p>
+                        <p class="text-slate-600 dark:text-slate-400">{{ order.phone|default:"۰۹۱۲۳۴۵۶۷۸۹" }}</p>
+                        <p class="text-slate-600 dark:text-slate-400">{{ order.address }}</p>
+                    </div>
+                </div>
+
+                <!-- ===== فاکتور ===== -->
+                <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50"
+                     data-aos="fade-up" data-aos-delay="200">
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <i data-lucide="file-text" class="size-5 text-blue-600"></i>
+                        فاکتور
+                    </h2>
+
+                    <div class="mt-4 space-y-2 text-sm">
+                        <p class="text-slate-600 dark:text-slate-400">شماره فاکتور:
+                            <span class="font-medium text-slate-800 dark:text-white">INV-{{ order.order_number }}</span>
+                        </p>
+                        <p class="text-slate-600 dark:text-slate-400">تاریخ: <span
+                                class="font-medium text-slate-800 dark:text-white">{{ order.created_at|date:"Y/m/d" }}</span>
+                        </p>
+
+                        <div class="flex flex-wrap items-center gap-2 pt-2">
+                            <button class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-medium text-white transition-all hover:bg-blue-700">
+                                <i data-lucide="download" class="size-3.5"></i>
+                                دانلود
+                            </button>
+                            <button class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 px-4 py-2 text-xs font-medium text-slate-700 transition-all hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                                <i data-lucide="printer" class="size-3.5"></i>
+                                چاپ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== اقدامات ===== -->
+                <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50"
+                     data-aos="fade-up" data-aos-delay="250">
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <i data-lucide="zap" class="size-5 text-blue-600"></i>
+                        اقدامات
+                    </h2>
+
+                    <div class="mt-4 space-y-2">
+                        <button onclick="reorder('{{ order.id }}')"
+                                class="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition-all hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                            <i data-lucide="rotate-ccw" class="size-4"></i>
+                            خرید مجدد
+                        </button>
+                        <button class="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition-all hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                            <i data-lucide="truck" class="size-4"></i>
+                            پیگیری مرسوله
+                        </button>
+                        <button class="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition-all hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                            <i data-lucide="headphones" class="size-4"></i>
+                            تماس با پشتیبانی
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ===== محصولات پیشنهادی ===== -->
+        {% if recommended_products %}
+            <div class="mt-12" data-aos="fade-up" data-aos-delay="300">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <i data-lucide="sparkles" class="size-5 text-blue-600"></i>
+                        محصولات پیشنهادی
+                    </h2>
+                    <a href="{% url 'apps.products:product_list' %}"
+                       class="text-sm text-blue-600 hover:underline dark:text-blue-400">مشاهده
+                        همه</a>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {% for product in recommended_products|slice:":5" %}
+                        <div class="group rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                            <div class="relative">
+                                <div class="aspect-square rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                    {% if product.image %}
+                                        <img src="{{ product.image.url }}"
+                                             alt="{{ product.name }}"
+                                             class="size-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                    {% else %}
+                                        <div class="size-full flex items-center justify-center text-slate-400">
+                                            <i data-lucide="image" class="size-8"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                {% if product.discount_price %}
+                                    <div class="absolute top-2 right-2 rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                                        {{ product.get_discount_percent|default:"-??" }}%
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mt-3 space-y-1.5">
+                                <h4 class="text-sm font-semibold text-slate-800 dark:text-white line-clamp-1">{{ product.name }}</h4>
+                                <div class="flex items-center gap-2">
+                                    {% if product.discount_price %}
+                                        <span class="text-xs text-slate-400 line-through">{{ product.price|floatformat:0 }}</span>
+                                        <span class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ product.discount_price|floatformat:0 }}</span>
+                                    {% else %}
+                                        <span class="text-sm font-bold text-slate-800 dark:text-white">{{ product.price|floatformat:0 }}</span>
+                                    {% endif %}
+                                    <span class="text-[10px] text-slate-400">تومان</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 pt-1">
+                                    <button class="flex-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-blue-700"
+                                            aria-label="افزودن به سبد خرید">
+                                        <i data-lucide="shopping-cart"
+                                           class="size-3.5 inline-block ml-1"></i>
+                                        خرید
+                                    </button>
+                                    <button class="rounded-lg border border-slate-200 p-1.5 text-slate-400 transition-all hover:bg-slate-100 hover:text-rose-600 dark:border-slate-700 dark:hover:bg-slate-800"
+                                            aria-label="افزودن به علاقه‌مندی‌ها">
+                                        <i data-lucide="heart" class="size-3.5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+
+    <!-- ===== مودال ثبت نظر ===== -->
+    <div id="reviewModal"
+         class="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="relative w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900">
+
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white">
+                    ثبت نظر برای <span id="productName"
+                                       class="text-blue-600 dark:text-blue-400"></span>
+                </h3>
+                <button onclick="closeReviewModal()"
+                        class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="x" class="size-5"></i>
+                </button>
+            </div>
+
+            <form method="POST" action="{% url 'apps.orders:order_detail' order.id %}"
+                  class="space-y-4">
+                {% csrf_token %}
+
+                <input type="hidden" name="product_id" id="reviewProductId">
+
+                <!-- ===== انتخاب امتیاز ===== -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        امتیاز شما
+                    </label>
+                    <div class="flex items-center gap-2"
+                         x-data="{ rating: 0 }">
+                        <template x-for="star in 5" :key="star">
+                            <button type="button"
+                                    @click="rating = star"
+                                    class="text-2xl transition-all hover:scale-110"
+                                    :class="star <= rating ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600'">
+                                <i data-lucide="star"
+                                   :class="star <= rating ? 'fill-amber-400' : ''"
+                                   class="size-7"></i>
+                            </button>
+                        </template>
+                        <input type="hidden" name="rating" x-model="rating" required>
+                        <span class="text-sm text-slate-400 mr-2"
+                              x-text="rating > 0 ? rating + ' ستاره' : 'انتخاب کنید'"></span>
+                    </div>
+                </div>
+
+                <!-- ===== متن نظر ===== -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        متن نظر
+                    </label>
+                    <textarea name="comment"
+                              rows="4"
+                              placeholder="نظر خود را درباره این محصول بنویسید..."
+                              class="w-full rounded-xl border bg-white/50 px-4 py-3 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+                              required></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="submit"
+                            class="flex-1 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700">
+                        <i data-lucide="send" class="size-4 inline-block ml-1"></i>
+                        ثبت نظر
+                    </button>
+                    <button type="button"
+                            onclick="closeReviewModal()"
+                            class="rounded-xl border border-slate-300 px-6 py-2.5 text-sm font-medium text-slate-700 transition-all hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                        انصراف
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ===== توابع مودال نظر =====
+        function openReviewModal(productId, productName) {
+            const modal = document.getElementById('reviewModal');
+            document.getElementById('reviewProductId').value = productId;
+            document.getElementById('productName').textContent = productName;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeReviewModal() {
+            const modal = document.getElementById('reviewModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // ===== بستن مودال با کلیک روی پس‌زمینه =====
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('reviewModal');
+
+            modal.addEventListener('click', function (e) {
+                if (e.target === this) {
+                    closeReviewModal();
+                }
+            });
+
+            // ===== بستن مودال با کلید ESC =====
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closeReviewModal();
+                }
+            });
+
+            // ===== توابع دیگر =====
+            window.reorder = function (orderId) {
+                alert(`در حال افزودن محصولات سفارش #${orderId} به سبد خرید...`);
+                // window.location.href = `/orders/${orderId}/reorder/`;
+            };
+        });
+    </script>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+{% endblock %}

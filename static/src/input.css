@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+@font-face {
+    font-family: "Vazirmatn";
+    src: url("../fonts/vazirmatn/Vazirmatn-Regular.woff2") format("woff2");
+    font-weight:400;
+}
+
+@font-face {
+    font-family: "Vazirmatn";
+    src: url("../fonts/vazirmatn/Vazirmatn-Bold.woff2") format("woff2");
+    font-weight:700;
+}
+
+@theme{
+
+    --font-sans:"Vazirmatn",sans-serif;
+
+    --color-primary:#2563eb;
+
+    --color-secondary:#06b6d4;
+
+}
+
+[x-cloak]{
+    display:none!important;
+}

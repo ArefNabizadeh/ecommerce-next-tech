@@ -1,0 +1,156 @@
+<!-- templates/dashboard/partials/address_form_fields.html -->
+{% load static %}
+
+<!-- نام گیرنده -->
+<div x-data="{ focused: false }">
+    <label for="id_recipient_name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">نام گیرنده</label>
+    <div class="relative">
+        <input type="text" name="recipient_name" id="id_recipient_name"
+            x-model="editForm.recipient_name"
+            class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+            :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+            @focus="focused = true" @blur="focused = false"
+            placeholder="نام کامل گیرنده" required
+            maxlength="100"
+            autocomplete="name">
+        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+            <i data-lucide="user" class="size-4 text-slate-400"></i>
+        </div>
+    </div>
+</div>
+
+<!-- شماره تلفن -->
+<div x-data="{ focused: false }">
+    <label for="id_phone" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">شماره تلفن</label>
+    <div class="relative">
+        <input type="tel" name="phone" id="id_phone"
+            x-model="editForm.phone"
+            class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+            :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+            @focus="focused = true" @blur="focused = false"
+            placeholder="۰۹۱۲۳۴۵۶۷۸۹" required
+            inputmode="numeric"
+            maxlength="11"
+            pattern="[0-9]{11}"
+            autocomplete="tel">
+        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+            <i data-lucide="phone" class="size-4 text-slate-400"></i>
+        </div>
+    </div>
+</div>
+
+<!-- استان -->
+<div x-data="{ focused: false }">
+    <label for="id_province" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">استان</label>
+    <div class="relative">
+        <input type="text" name="province" id="id_province"
+            x-model="editForm.province"
+            class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+            :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+            @focus="focused = true" @blur="focused = false"
+            placeholder="استان" required
+            autocomplete="address-level1">
+        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+            <i data-lucide="map-pin" class="size-4 text-slate-400"></i>
+        </div>
+    </div>
+</div>
+
+<!-- شهر -->
+<div x-data="{ focused: false }">
+    <label for="id_city" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">شهر</label>
+    <div class="relative">
+        <input type="text" name="city" id="id_city"
+            x-model="editForm.city"
+            class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+            :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+            @focus="focused = true" @blur="focused = false"
+            placeholder="شهر" required
+            autocomplete="address-level2">
+        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+            <i data-lucide="map-pin" class="size-4 text-slate-400"></i>
+        </div>
+    </div>
+</div>
+
+<!-- آدرس -->
+<div x-data="{ focused: false }">
+    <label for="id_street_address" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">آدرس</label>
+    <div class="relative">
+        <textarea name="street_address" id="id_street_address" rows="4"
+            x-model="editForm.street_address"
+            class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+            :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+            @focus="focused = true" @blur="focused = false"
+            placeholder="خیابان، پلاک، واحد..." required
+            maxlength="500"
+            autocomplete="street-address"></textarea>
+        <div class="absolute inset-y-0 right-3 flex items-start pt-3 pointer-events-none">
+            <i data-lucide="home" class="size-4 text-slate-400"></i>
+        </div>
+    </div>
+</div>
+
+<!-- کد پستی -->
+<div x-data="{ focused: false }">
+    <label for="id_postal_code" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">کد پستی</label>
+    <div class="relative">
+        <input type="text" name="postal_code" id="id_postal_code"
+            x-model="editForm.postal_code"
+            class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+            :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+            @focus="focused = true" @blur="focused = false"
+            placeholder="کد پستی ده رقمی"
+            inputmode="numeric"
+            maxlength="10"
+            pattern="[0-9]{10}"
+            autocomplete="postal-code">
+        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+            <i data-lucide="navigation" class="size-4 text-slate-400"></i>
+        </div>
+    </div>
+</div>
+
+<!-- واحد -->
+<div x-data="{ focused: false }">
+    <label for="id_unit" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">واحد (اختیاری)</label>
+    <div class="relative">
+        <input type="text" name="unit" id="id_unit"
+            x-model="editForm.unit"
+            class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+            :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+            @focus="focused = true" @blur="focused = false"
+            placeholder="واحد (اختیاری)"
+            maxlength="50">
+        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+            <i data-lucide="building" class="size-4 text-slate-400"></i>
+        </div>
+    </div>
+</div>
+
+<!-- یادداشت تحویل -->
+<div x-data="{ focused: false }">
+    <label for="id_delivery_notes" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">یادداشت تحویل (اختیاری)</label>
+    <div class="relative">
+        <textarea name="delivery_notes" id="id_delivery_notes" rows="3"
+            x-model="editForm.delivery_notes"
+            class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500"
+            :class="focused ? 'border-blue-500 ring-2 ring-blue-200 dark:border-blue-500 dark:ring-blue-500/20' : 'border-slate-200 dark:border-slate-700'"
+            @focus="focused = true" @blur="focused = false"
+            placeholder="نکات ویژه برای تحویل (اختیاری)"
+            maxlength="500"></textarea>
+        <div class="absolute inset-y-0 right-3 flex items-start pt-3 pointer-events-none">
+            <i data-lucide="edit" class="size-4 text-slate-400"></i>
+        </div>
+    </div>
+</div>
+
+<!-- آدرس پیش‌فرض -->
+<div class="flex items-center gap-2.5">
+    <input type="checkbox" name="is_default" id="id_is_default"
+        x-model="editForm.is_default"
+        class="size-4 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-800">
+    <label for="id_is_default" class="text-sm text-slate-600 dark:text-slate-400">
+        این آدرس به عنوان پیش‌فرض انتخاب شود
+    </label>
+</div>

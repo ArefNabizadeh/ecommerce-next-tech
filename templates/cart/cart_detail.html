@@ -1,0 +1,472 @@
+<!-- templates/cart/cart-detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}سبد خرید | نکست‌تک{% endblock %}
+
+{% block content %}
+
+    <div class="container max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+
+        <!-- ===== هدر صفحه ===== -->
+        <div class="flex items-center justify-between gap-4 mb-8" data-aos="fade-up">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
+                    <i data-lucide="shopping-cart" class="size-7 text-blue-600"></i>
+                    سبد خرید
+                </h1>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">محصولات
+                    انتخاب شده برای خرید</p>
+            </div>
+            {% if cart_items %}
+                <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+                {{ cart_items|length }} محصول
+            </span>
+            {% endif %}
+        </div>
+
+        <!-- ===== کارت‌های خلاصه ===== -->
+        {% if cart_items %}
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" data-aos="fade-up"
+                 data-aos-delay="50">
+
+                <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-2xl font-bold text-slate-800 dark:text-white">{{ cart_items|length }}</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">تعداد
+                                محصولات</p>
+                        </div>
+                        <div class="rounded-full bg-blue-100 p-2.5 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400">
+                            <i data-lucide="package" class="size-5"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ available_count }}</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                کالاهای موجود</p>
+                        </div>
+                        <div class="rounded-full bg-emerald-100 p-2.5 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
+                            <i data-lucide="check-circle" class="size-5"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-2xl font-bold text-slate-800 dark:text-white">{{ cart_total|floatformat:0|default:0 }}</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">مبلغ
+                                کل</p>
+                        </div>
+                        <div class="rounded-full bg-amber-100 p-2.5 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400">
+                            <i data-lucide="ticket-percent" class="size-5"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-2xl font-bold text-rose-600 dark:text-rose-400">{{ discount|floatformat:0|default:0 }}</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                تخفیف</p>
+                        </div>
+                        <div class="rounded-full bg-rose-100 p-2.5 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400">
+                            <i data-lucide="badge-percent" class="size-5"></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        {% endif %}
+
+        <!-- ===== محتوای اصلی ===== -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- ===== ستون سمت چپ: آیتم‌های سبد خرید ===== -->
+            <div class="lg:col-span-2 space-y-4">
+
+                {% if cart_items %}
+                    {% for item in cart_items %}
+                        <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 md:p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50 group"
+                             data-aos="fade-up"
+                             data-aos-delay="{{ forloop.counter0|add:100 }}">
+
+                            <div class="flex flex-col sm:flex-row gap-4">
+
+                                <!-- تصویر محصول -->
+                                <div class="relative flex-shrink-0">
+                                    <div class="size-24 md:size-32 rounded-2xl bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                        {% if item.product.image %}
+                                            <img src="{{ item.product.image.url }}"
+                                                 alt="{{ item.product.name }}"
+                                                 class="size-full object-cover">
+                                        {% else %}
+                                            <div class="size-full flex items-center justify-center text-slate-400">
+                                                <i data-lucide="image"
+                                                   class="size-8"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    {% if item.product.discount_price %}
+                                        <div class="absolute -top-1 -right-1 rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                                            {{ item.product.get_discount_percent|default:"-??" }}%
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- اطلاعات محصول -->
+                                <div class="flex-1 min-w-0 space-y-2">
+                                    <div class="flex flex-wrap items-start justify-between gap-2">
+                                        <div>
+                                            <h3 class="text-base font-semibold text-slate-800 dark:text-white line-clamp-1">
+                                                {{ item.product.name }}
+                                            </h3>
+                                            {% if item.product.brand %}
+                                                <p class="text-sm text-slate-500 dark:text-slate-400">{{ item.product.brand.name }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <div><!-- دکمه حذف -->
+                                                <form method="POST"
+                                                      action="{% url 'apps.cart:remove_from_cart' item.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit"
+                                                            class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-rose-600 dark:hover:bg-slate-800 dark:hover:text-rose-400"
+                                                            aria-label="حذف از سبد خرید">
+                                                        <i data-lucide="trash-2"
+                                                           class="size-4"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                            <div>
+                                                <!-- دکمه علاقه‌مندی -->
+                                                <form method="POST"
+                                                      action="{% url 'apps.cart:move_to_wishlist' item.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit"
+                                                            class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-rose-600 dark:hover:bg-slate-800 dark:hover:text-rose-400"
+                                                            aria-label="افزودن به علاقه‌مندی‌ها">
+                                                        <i data-lucide="heart"
+                                                           class="size-4"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- مشخصات -->
+                                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                                        {% if item.product.color %}
+                                            <span class="flex items-center gap-1">
+                                        <span class="inline-block size-3 rounded-full"
+                                              style="background-color: {{ item.product.color }};"></span>
+                                        {{ item.product.color }}
+                                    </span>
+                                        {% endif %}
+                                        {% if item.product.warranty %}
+                                            <span>گارانتی: {{ item.product.warranty }}</span>
+                                        {% endif %}
+                                        <span class="flex items-center gap-1">
+                                    <i data-lucide="truck" class="size-3.5"></i>
+                                    ارسال ۳-۵ روز
+                                </span>
+                                    </div>
+
+                                    <!-- موجودی و قیمت -->
+                                    <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                                        <div class="flex items-center gap-2">
+                                            {% if item.product.stock > 0 %}
+                                                <span class="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
+                                            <span class="inline-block size-1.5 rounded-full bg-emerald-500"></span>
+                                            موجود
+                                        </span>
+                                            {% else %}
+                                                <span class="inline-flex items-center gap-1 text-xs text-rose-600 dark:text-rose-400">
+                                            <span class="inline-block size-1.5 rounded-full bg-rose-500"></span>
+                                            ناموجود
+                                        </span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            {% if item.product.discount_price %}
+                                                <span class="text-sm text-slate-400 line-through">{{ item.product.price|floatformat:0 }}</span>
+                                                <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ item.product.discount_price|floatformat:0 }}</span>
+                                            {% else %}
+                                                <span class="text-lg font-bold text-slate-800 dark:text-white">{{ item.product.price|floatformat:0 }}</span>
+                                            {% endif %}
+                                            <span class="text-xs text-slate-400">تومان</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- انتخابگر تعداد -->
+                                    <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                                        <div class="flex items-center gap-1.5"
+                                             x-data="{ quantity: {{ item.quantity }}, itemId: {{ item.id }} }">
+                                            <form method="POST"
+                                                  action="{% url 'apps.cart:update_cart_item' item.id %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="quantity"
+                                                       :value="quantity - 1">
+                                                <button type="submit"
+                                                        @click.prevent="if(quantity > 1) { quantity--; $el.closest('form').submit(); }"
+                                                        class="rounded-lg border border-slate-200 p-1.5 text-slate-500 transition-all hover:bg-slate-100 hover:text-blue-600 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+                                                        aria-label="کاهش تعداد">
+                                                    <i data-lucide="minus"
+                                                       class="size-3.5"></i>
+                                                </button>
+                                            </form>
+                                            <span class="w-8 text-center text-sm font-medium text-slate-800 dark:text-white"
+                                                  x-text="quantity">{{ item.quantity }}</span>
+                                            <form method="POST"
+                                                  action="{% url 'apps.cart:update_cart_item' item.id %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="quantity"
+                                                       :value="quantity + 1">
+                                                <button type="submit"
+                                                        @click.prevent="quantity++; $el.closest('form').submit();"
+                                                        class="rounded-lg border border-slate-200 p-1.5 text-slate-500 transition-all hover:bg-slate-100 hover:text-blue-600 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+                                                        aria-label="افزایش تعداد">
+                                                    <i data-lucide="plus"
+                                                       class="size-3.5"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    مجموع: <span
+                                                class="font-bold text-slate-800 dark:text-white">{{ item.total_price|floatformat:0 }}</span> تومان
+                                </span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- ===== حالت خالی ===== -->
+                    <div class="flex flex-col items-center justify-center rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-12 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50 text-center"
+                         data-aos="fade-up">
+                        <div class="size-24 rounded-full bg-slate-100 flex items-center justify-center dark:bg-slate-800">
+                            <i data-lucide="shopping-cart"
+                               class="size-12 text-slate-400"></i>
+                        </div>
+                        <h3 class="mt-4 text-xl font-bold text-slate-800 dark:text-white">
+                            سبد خرید شما خالی است</h3>
+                        <p class="mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
+                            هنوز محصولی به سبد خرید خود اضافه نکرده‌اید. فروشگاه نکست‌تک
+                            پر از محصولات جذاب است!
+                        </p>
+                        <a href="{% url 'apps.products:product_list' %}"
+                           class="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40">
+                            <i data-lucide="shopping-bag" class="size-4"></i>
+                            مشاهده محصولات
+                        </a>
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <!-- ===== ستون سمت راست: خلاصه سفارش ===== -->
+            <div class="lg:col-span-1">
+                <div class="sticky top-24 space-y-4">
+
+                    <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50"
+                         data-aos="fade-up" data-aos-delay="200">
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white">
+                            خلاصه سفارش</h3>
+
+                        <div class="mt-4 space-y-3">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-slate-500 dark:text-slate-400">جمع کل</span>
+                                <span class="font-medium text-slate-800 dark:text-white">{{ cart_total|floatformat:0|default:0 }} تومان</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-slate-500 dark:text-slate-400">تخفیف محصولات</span>
+                                <span class="font-medium text-rose-600 dark:text-rose-400">
+                                    {% if discount > 0 %}
+                                        -{{ discount|floatformat:0|default:0 }} تومان
+                                    {% else %}
+                                        ۰ تومان
+                                    {% endif %}
+                                </span>
+                            </div>
+                            {% if coupon_code %}
+                                <div class="flex items-center justify-between text-sm bg-emerald-50 dark:bg-emerald-950/20 p-2 rounded-lg">
+                                    <span class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                        <i data-lucide="ticket" class="size-3.5"></i>
+                                        کد تخفیف
+                                    </span>
+                                    <span class="font-medium text-emerald-700 dark:text-emerald-300">
+                                        {{ coupon_code }} ({{ coupon_discount|floatformat:0 }} تومان-)
+                                    </span>
+                                </div>
+                            {% endif %}
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-slate-500 dark:text-slate-400">هزینه ارسال</span>
+                                <span class="font-medium text-slate-800 dark:text-white">
+                                    {% if shipping_cost > 0 %}
+                                        {{ shipping_cost|floatformat:0|default:0 }}
+                                        تومان
+                                    {% else %}
+                                        رایگان
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-slate-500 dark:text-slate-400">مالیات</span>
+                                <span class="font-medium text-slate-800 dark:text-white">{{ tax|floatformat:0|default:0 }} تومان</span>
+                            </div>
+
+                            <div class="pt-3 border-t border-slate-200/50 dark:border-slate-700/50">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-base font-bold text-slate-800 dark:text-white">قابل پرداخت</span>
+                                    <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ final_price|floatformat:0|default:0 }} تومان</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ===== کد تخفیف (اصلاح شده) ===== -->
+                        <div class="mt-4 pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
+                            {% if coupon_code %}
+                                <!-- نمایش کوپن اعمال شده -->
+                                <div class="flex items-center justify-between rounded-xl bg-emerald-50 p-3 dark:bg-emerald-950/20">
+                                    <div>
+                                        <span class="text-xs text-emerald-600 dark:text-emerald-400">✅ کد تخفیف اعمال شد</span>
+                                        <p class="text-sm font-bold text-emerald-700 dark:text-emerald-300">{{ coupon_code }}</p>
+                                        <p class="text-xs text-emerald-600 dark:text-emerald-400">
+                                            تخفیف: {{ coupon_discount|floatformat:0 }}
+                                            تومان</p>
+                                    </div>
+                                    <a href="{% url 'apps.cart:remove_coupon' %}"
+                                       class="text-xs text-rose-500 hover:text-rose-700 transition-colors">
+                                        حذف
+                                    </a>
+                                </div>
+                            {% else %}
+                                <!-- فرم اعمال کوپن -->
+                                <form method="POST"
+                                      action="{% url 'apps.cart:apply_coupon' %}"
+                                      class="flex gap-2">
+                                    {% csrf_token %}
+                                    <input type="text"
+                                           name="coupon_code"
+                                           placeholder="کد تخفیف..."
+                                           class="flex-1 rounded-xl border bg-white/50 px-3 py-2 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500">
+                                    <button type="submit"
+                                            class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700">
+                                        اعمال
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+
+                        <!-- دکمه‌ها -->
+                        <div class="mt-4 space-y-3">
+                            <a href="{% url 'apps.orders:checkout' %}"
+                               class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40">
+                                <i data-lucide="credit-card" class="size-4"></i>
+                                ادامه فرآیند خرید
+                            </a>
+                            <a href="{% url 'apps.products:product_list' %}"
+                               class="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-6 py-3 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                                <i data-lucide="arrow-right" class="size-4"></i>
+                                ادامه خرید
+                            </a>
+                        </div>
+
+                        <!-- نشان امنیت -->
+                        <div class="mt-4 flex items-center justify-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                            <i data-lucide="shield-check"
+                               class="size-4 text-emerald-500"></i>
+                            <span>پرداخت امن و رمزنگاری شده</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== محصولات پیشنهادی ===== -->
+        {% if suggested_products %}
+            <div class="mt-12" data-aos="fade-up" data-aos-delay="300">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-white">محصولات
+                        پیشنهادی</h2>
+                    <a href="{% url 'apps.products:product_list' %}"
+                       class="text-sm text-blue-600 hover:underline dark:text-blue-400">مشاهده
+                        همه</a>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {% for product in suggested_products|slice:":5" %}
+                        <div class="group rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                            <div class="relative">
+                                <div class="aspect-square rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                    {% if product.image %}
+                                        <img src="{{ product.image.url }}"
+                                             alt="{{ product.name }}"
+                                             class="size-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                    {% else %}
+                                        <div class="size-full flex items-center justify-center text-slate-400">
+                                            <i data-lucide="image" class="size-8"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                {% if product.discount_price %}
+                                    <div class="absolute top-2 right-2 rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                                        {{ product.get_discount_percent|default:"-??" }}%
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mt-3 space-y-1.5">
+                                <h4 class="text-sm font-semibold text-slate-800 dark:text-white line-clamp-1">{{ product.name }}</h4>
+                                <div class="flex items-center gap-2">
+                                    {% if product.discount_price %}
+                                        <span class="text-xs text-slate-400 line-through">{{ product.price|floatformat:0 }}</span>
+                                        <span class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ product.discount_price|floatformat:0 }}</span>
+                                    {% else %}
+                                        <span class="text-sm font-bold text-slate-800 dark:text-white">{{ product.price|floatformat:0 }}</span>
+                                    {% endif %}
+                                    <span class="text-[10px] text-slate-400">تومان</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 pt-1">
+                                    <form method="POST"
+                                          action="{% url 'apps.cart:add_to_cart' product.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                                class="flex-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-blue-700"
+                                                aria-label="افزودن به سبد خرید">
+                                            <i data-lucide="shopping-cart"
+                                               class="size-3.5 inline-block ml-1"></i>
+                                            خرید
+                                        </button>
+                                    </form>
+                                    <button class="rounded-lg border border-slate-200 p-1.5 text-slate-400 transition-all hover:bg-slate-100 hover:text-rose-600 dark:border-slate-700 dark:hover:bg-slate-800"
+                                            aria-label="افزودن به علاقه‌مندی‌ها">
+                                        <i data-lucide="heart" class="size-3.5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+{% endblock %}

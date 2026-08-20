@@ -1,0 +1,306 @@
+<!-- templates/orders/order-list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}لیست سفارشات | نکست‌تک{% endblock %}
+
+{% block content %}
+
+<div class="container max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+
+    <!-- ===== هدر صفحه ===== -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8"
+         data-aos="fade-up">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
+                <i data-lucide="package" class="size-7 text-blue-600"></i>
+                سفارشات من
+            </h1>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">مشاهده و
+                مدیریت تمام سفارشات شما</p>
+        </div>
+        {% if orders %}
+            <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+                {{ total_orders }} سفارش
+            </span>
+        {% endif %}
+    </div>
+
+    <!-- ===== آمار سفارشات ===== -->
+    {% if orders %}
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8"
+             data-aos="fade-up" data-aos-delay="50">
+
+            <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-3 text-center shadow-xl transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                <p class="text-xl font-bold text-slate-800 dark:text-white">{{ total_orders }}</p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400">کل</p>
+            </div>
+
+            <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-3 text-center shadow-xl transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                <p class="text-xl font-bold text-amber-600 dark:text-amber-400">{{ pending_orders|default:0 }}</p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400">در انتظار</p>
+            </div>
+
+            <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-3 text-center shadow-xl transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                <p class="text-xl font-bold text-blue-600 dark:text-blue-400">{{ processing_orders|default:0 }}</p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400">در حال آماده‌سازی</p>
+            </div>
+
+            <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-3 text-center shadow-xl transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                <p class="text-xl font-bold text-indigo-600 dark:text-indigo-400">{{ shipped_orders|default:0 }}</p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400">در حال ارسال</p>
+            </div>
+
+            <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-3 text-center shadow-xl transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                <p class="text-xl font-bold text-emerald-600 dark:text-emerald-400">{{ delivered_orders|default:0 }}</p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400">تحویل شده</p>
+            </div>
+
+            <div class="rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-3 text-center shadow-xl transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                <p class="text-xl font-bold text-rose-600 dark:text-rose-400">{{ cancelled_orders|default:0 }}</p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400">لغو شده</p>
+            </div>
+
+        </div>
+    {% endif %}
+
+    <!-- ===== فیلتر و جستجو ===== -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6"
+         data-aos="fade-up" data-aos-delay="100">
+
+        <form method="GET" action="{% url 'apps.orders:order_list' %}" class="relative flex-1 max-w-sm">
+            <input type="text"
+                   name="q"
+                   placeholder="جستجوی سفارش..."
+                   value="{{ request.GET.q|default:'' }}"
+                   class="w-full rounded-xl border bg-white/50 px-4 py-2.5 pr-10 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500">
+            <button type="submit" class="absolute inset-y-0 right-0 flex items-center pl-3 pointer-events-none">
+                <i data-lucide="search" class="size-4 text-slate-400"></i>
+            </button>
+        </form>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <form method="GET" action="{% url 'apps.orders:order_list' %}" id="filter-form">
+                <select name="status"
+                        class="rounded-xl border bg-white/50 px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white"
+                        onchange="this.closest('form').submit();">
+                    <option value="">همه وضعیت‌ها</option>
+                    <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>در انتظار</option>
+                    <option value="processing" {% if request.GET.status == 'processing' %}selected{% endif %}>در حال پردازش</option>
+                    <option value="shipped" {% if request.GET.status == 'shipped' %}selected{% endif %}>در حال ارسال</option>
+                    <option value="delivered" {% if request.GET.status == 'delivered' %}selected{% endif %}>تحویل شده</option>
+                    <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>لغو شده</option>
+                </select>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- ===== لیست سفارشات ===== -->
+    {% if orders %}
+        <div class="space-y-4" data-aos="fade-up" data-aos-delay="150">
+
+            {% for order in orders %}
+                <!-- ===== کارت سفارش ===== -->
+                <div class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 md:p-6 shadow-xl transition-all duration-200 hover:shadow-2xl hover:-translate-y-1 dark:bg-slate-900/80 dark:border-slate-800/50">
+
+                    <div class="flex flex-col md:flex-row md:items-center gap-4">
+
+                        <!-- ===== اطلاعات اصلی ===== -->
+                        <div class="flex-1 min-w-0 space-y-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-base font-bold text-slate-800 dark:text-white">#{{ order.order_number }}</span>
+                                <span class="rounded-full px-2.5 py-0.5 text-[10px] font-medium
+                                    {% if order.status == 'pending' %}bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400
+                                    {% elif order.status == 'processing' %}bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400
+                                    {% elif order.status == 'shipped' %}bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400
+                                    {% elif order.status == 'delivered' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400
+                                    {% elif order.status == 'cancelled' %}bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400
+                                    {% else %}bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                                <span class="text-xs text-slate-500 dark:text-slate-400">{{ order.created_at|date:"Y/m/d" }}</span>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-slate-600 dark:text-slate-400">
+                                <span class="flex items-center gap-1.5">
+                                    <i data-lucide="package" class="size-3.5"></i>
+                                    {{ order.items_count }} محصول
+                                </span>
+                                <span class="flex items-center gap-1.5">
+                                    <i data-lucide="credit-card" class="size-3.5"></i>
+                                    {{ order.total_price|floatformat:0 }} تومان
+                                </span>
+                                <span class="flex items-center gap-1.5">
+                                    <i data-lucide="truck" class="size-3.5"></i>
+                                    {{ order.get_shipping_method_display }}
+                                </span>
+                                {% if order.tracking_code %}
+                                    <span class="flex items-center gap-1.5">
+                                        <i data-lucide="truck" class="size-3.5"></i>
+                                        کد رهگیری: {{ order.tracking_code }}
+                                    </span>
+                                {% endif %}
+                                <span class="flex items-center gap-1.5">
+                                    <i data-lucide="calendar" class="size-3.5"></i>
+                                    تحویل: {{ order.expected_delivery|default:"۳-۵ روز" }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- ===== دکمه‌ها ===== -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <a href="{% url 'apps.orders:order_detail' order.id %}"
+                               class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5">
+                                <i data-lucide="eye" class="size-3.5"></i>
+                                جزئیات
+                            </a>
+                            <button onclick="printInvoice('{{ order.order_number }}')"
+                                    class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 px-4 py-2 text-xs font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                                <i data-lucide="file-text" class="size-3.5"></i>
+                                فاکتور
+                            </button>
+                            <button onclick="reorder('{{ order.id }}')"
+                                    class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 px-4 py-2 text-xs font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                                <i data-lucide="rotate-ccw" class="size-3.5"></i>
+                                خرید مجدد
+                            </button>
+                            {% if order.status == 'pending' %}
+                                <button onclick="openCancelModal('{{ order.id }}')"
+                                        class="inline-flex items-center gap-1.5 rounded-xl border border-rose-300 px-4 py-2 text-xs font-medium text-rose-600 transition-all duration-200 hover:bg-rose-50 dark:border-rose-800/50 dark:text-rose-400 dark:hover:bg-rose-950/30">
+                                    <i data-lucide="x-circle" class="size-3.5"></i>
+                                    لغو
+                                </button>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+
+        <!-- ===== صفحه‌بندی ===== -->
+        {% if is_paginated %}
+            <div class="mt-8" data-aos="fade-up" data-aos-delay="200">
+                {% include 'partials/pagination.html' with page_obj=page_obj %}
+            </div>
+        {% endif %}
+
+    {% else %}
+        <!-- ===== حالت خالی ===== -->
+        <div class="flex flex-col items-center justify-center rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-12 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50 text-center"
+             data-aos="fade-up">
+            <div class="size-24 rounded-full bg-slate-100 flex items-center justify-center dark:bg-slate-800">
+                <i data-lucide="package" class="size-12 text-slate-400"></i>
+            </div>
+            <h3 class="mt-4 text-xl font-bold text-slate-800 dark:text-white">هیچ سفارشی وجود ندارد</h3>
+            <p class="mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
+                هنوز سفارشی ثبت نکرده‌اید. فروشگاه نکست‌تک پر از محصولات جذاب است!
+            </p>
+            <a href="{% url 'apps.products:product_list' %}"
+               class="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40">
+                <i data-lucide="shopping-bag" class="size-4"></i>
+                شروع خرید
+            </a>
+        </div>
+    {% endif %}
+
+</div>
+
+<!-- ======================================== -->
+<!-- ===== مودال لغو سفارش (با JS خالص) ===== -->
+<!-- ======================================== -->
+
+<div id="cancelModal"
+     class="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900 text-center">
+        <div class="size-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto dark:bg-amber-950/30">
+            <i data-lucide="alert-triangle" class="size-8 text-amber-600 dark:text-amber-400"></i>
+        </div>
+
+        <h3 class="mt-4 text-xl font-bold text-slate-800 dark:text-white">لغو سفارش</h3>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+            آیا از لغو این سفارش اطمینان دارید؟ این عمل قابل بازگشت نیست.
+        </p>
+
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <form id="cancelForm" method="POST">
+                {% csrf_token %}
+                <button type="submit"
+                        class="rounded-xl bg-amber-600 px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-amber-700">
+                    لغو سفارش
+                </button>
+            </form>
+            <button onclick="closeCancelModal()"
+                    class="rounded-xl border border-slate-300 px-6 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                انصراف
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== توابع مودال =====
+    function openCancelModal(orderId) {
+        const modal = document.getElementById('cancelModal');
+        const form = document.getElementById('cancelForm');
+
+        // تنظیم اکشن فرم با ID سفارش
+        form.action = "{% url 'apps.orders:cancel_order' 0 %}".replace('0', orderId);
+
+        // نمایش مودال
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCancelModal() {
+        const modal = document.getElementById('cancelModal');
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    // ===== توابع دکمه‌ها =====
+    function printInvoice(orderNumber) {
+        alert(`در حال آماده‌سازی فاکتور برای سفارش #${orderNumber}...`);
+        // می‌توانید به صفحه فاکتور هدایت کنید
+        // window.location.href = `/orders/${orderNumber}/invoice/`;
+    }
+
+    function reorder(orderId) {
+        alert(`در حال افزودن محصولات سفارش #${orderId} به سبد خرید...`);
+        // می‌توانید به API خرید مجدد هدایت کنید
+        // window.location.href = `/orders/${orderId}/reorder/`;
+    }
+
+    // ===== بستن مودال با کلیک روی پس‌زمینه =====
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('cancelModal');
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCancelModal();
+            }
+        });
+
+        // ===== بستن مودال با کلید ESC =====
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCancelModal();
+            }
+        });
+
+        // ===== آیکون‌ها =====
+        lucide.createIcons();
+    });
+</script>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+{% endblock %}

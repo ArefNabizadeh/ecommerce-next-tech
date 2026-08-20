@@ -1,0 +1,493 @@
+<!-- templates/products/product-detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} | نکست‌تک{% endblock %}
+
+{% block content %}
+
+    <div class="container max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
+
+        <!-- ===== Breadcrumb ===== -->
+        <nav class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-6"
+             data-aos="fade-down">
+            <a href="{% url 'apps.core:home' %}"
+               class="hover:text-blue-600 transition-colors">خانه</a>
+            <i data-lucide="chevron-left" class="size-3.5"></i>
+            <a href="{% url 'apps.products:product_list' %}"
+               class="hover:text-blue-600 transition-colors">محصولات</a>
+            <i data-lucide="chevron-left" class="size-3.5"></i>
+            {% if product.category %}
+                <a href="{% url 'apps.products:product_list' %}?category={{ product.category.slug }}"
+                   class="hover:text-blue-600 transition-colors">{{ product.category.name }}</a>
+                <i data-lucide="chevron-left" class="size-3.5"></i>
+            {% endif %}
+            <span class="text-slate-800 dark:text-white font-medium truncate">{{ product.name }}</span>
+        </nav>
+
+        <!-- ===== محصول اصلی ===== -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12" data-aos="fade-up">
+
+            <!-- ===== گالری تصاویر ===== -->
+            <div class="space-y-4">
+                <div class="relative rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 overflow-hidden shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50 group">
+                    <div class="aspect-square bg-slate-100 dark:bg-slate-800">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                                 class="size-full object-contain transition-transform duration-700 group-hover:scale-105 cursor-zoom-in"
+                                 id="mainImage">
+                        {% else %}
+                            <div class="size-full flex items-center justify-center text-slate-400 dark:text-slate-600">
+                                <i data-lucide="image" class="size-20"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% if product.discount_price %}
+                        <div class="absolute top-4 right-4 rounded-full bg-rose-500 px-3 py-1 text-xs font-bold text-white">
+                            {{ product.get_discount_percent|default:"-??" }}%
+                        </div>
+                    {% endif %}
+                    {% if product.stock <= 0 %}
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                            <span class="rounded-full bg-rose-500 px-6 py-3 text-lg font-bold text-white">ناموجود</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- تصاویر بندانگشتی -->
+                <div class="grid grid-cols-5 gap-3">
+                    {% if product.image %}
+                        <button class="aspect-square rounded-xl border-2 border-blue-500 overflow-hidden transition-all hover:scale-105"
+                                onclick="document.getElementById('mainImage').src='{{ product.image.url }}'">
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                                 class="size-full object-cover">
+                        </button>
+                    {% endif %}
+                    {% for image in gallery|slice:":4" %}
+                        <button class="aspect-square rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden transition-all hover:border-blue-500 hover:scale-105"
+                                onclick="document.getElementById('mainImage').src='{{ image.image.url }}'">
+                            <img src="{{ image.image.url }}" alt="{{ product.name }}"
+                                 class="size-full object-cover">
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ===== اطلاعات محصول ===== -->
+            <div class="space-y-4">
+
+                <!-- نام و برند -->
+                <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h1 class="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white">{{ product.name }}</h1>
+                        {% if product.is_featured %}
+                            <span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">ویژه</span>
+                        {% endif %}
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3 mt-1">
+                        {% if product.brand %}
+                            <span class="text-sm text-slate-500 dark:text-slate-400">{{ product.brand.name }}</span>
+                        {% endif %}
+                        {% if product.category %}
+                            <span class="text-sm text-slate-500 dark:text-slate-400">| {{ product.category.name }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- امتیاز -->
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center text-amber-400">
+                        {% with avg=product.average_rating|default:0 %}
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= avg %}
+                                    <i data-lucide="star"
+                                       class="size-4 fill-amber-400"></i>
+                                {% else %}
+                                    <i data-lucide="star"
+                                       class="size-4 text-slate-300 dark:text-slate-600"></i>
+                                {% endif %}
+                            {% endfor %}
+                        {% endwith %}
+                    </div>
+                    <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ product.average_rating|floatformat:1|default:0 }}</span>
+                    <span class="text-sm text-slate-500 dark:text-slate-400">({{ reviews_count|default:0 }} نظر)</span>
+                    <a href="#reviews"
+                       class="text-sm text-blue-600 hover:underline dark:text-blue-400">مشاهده
+                        نظرات</a>
+                </div>
+
+                <!-- قیمت -->
+                <div class="flex flex-wrap items-center gap-3 pt-2">
+                    {% if product.discount_price %}
+                        <span class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ product.discount_price|floatformat:0 }}</span>
+                        <span class="text-xl text-slate-400 line-through">{{ product.price|floatformat:0 }}</span>
+                        <span class="rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-medium text-rose-700 dark:bg-rose-950/30 dark:text-rose-400">
+                        {{ product.get_discount_percent|default:"-??" }}% تخفیف
+                    </span>
+                    {% else %}
+                        <span class="text-3xl font-bold text-slate-800 dark:text-white">{{ product.price|floatformat:0 }}</span>
+                    {% endif %}
+                    <span class="text-sm text-slate-400">تومان</span>
+                </div>
+
+                <!-- موجودی و گارانتی -->
+                <div class="flex flex-wrap items-center gap-4 text-sm">
+                    <div class="flex items-center gap-1.5">
+                        {% if product.stock > 0 %}
+                            <span class="inline-block size-2 rounded-full bg-emerald-500"></span>
+                            <span class="text-emerald-600 dark:text-emerald-400">موجود در انبار</span>
+                        {% else %}
+                            <span class="inline-block size-2 rounded-full bg-rose-500"></span>
+                            <span class="text-rose-600 dark:text-rose-400">ناموجود</span>
+                        {% endif %}
+                    </div>
+                    {% if product.warranty %}
+                        <div class="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                            <i data-lucide="shield" class="size-4"></i>
+                            <span>{{ product.warranty }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- انتخاب رنگ (در صورت وجود) -->
+                {% if product.color %}
+                    <div>
+                        <p class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                            رنگ:</p>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="size-8 rounded-full border-2 border-blue-500 transition-all hover:scale-110"
+                                    style="background-color: {{ product.color }};"
+                                    aria-label="{{ product.color }}">
+                            </button>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- انتخابگر تعداد -->
+                <div x-data="{ quantity: 1 }">
+                    <p class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        تعداد:</p>
+                    <div class="flex items-center gap-2">
+                        <button @click="if(quantity > 1) quantity--"
+                                class="rounded-lg border border-slate-200 p-2 text-slate-500 transition-all hover:bg-slate-100 hover:text-blue-600 dark:border-slate-700 dark:hover:bg-slate-800"
+                                aria-label="کاهش تعداد">
+                            <i data-lucide="minus" class="size-4"></i>
+                        </button>
+                        <span class="w-12 text-center text-lg font-medium text-slate-800 dark:text-white"
+                              x-text="quantity">1</span>
+                        <button @click="if(quantity < {{ product.stock }}) quantity++"
+                                class="rounded-lg border border-slate-200 p-2 text-slate-500 transition-all hover:bg-slate-100 hover:text-blue-600 dark:border-slate-700 dark:hover:bg-slate-800"
+                                aria-label="افزایش تعداد">
+                            <i data-lucide="plus" class="size-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- دکمه‌ها -->
+                <div class="flex flex-wrap gap-3 pt-2">
+                    <form method="POST"
+                          action="{% url 'apps.cart:add_to_cart' product.id %}"
+                          class="flex-1">
+                        {% csrf_token %}
+                        <input type="hidden" name="quantity" x-bind:value="quantity">
+                        <button type="submit"
+                                class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 hover:-translate-y-0.5 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40"
+                                {% if not product.is_in_stock %}disabled{% endif %}>
+                            <i data-lucide="shopping-cart" class="size-4"></i>
+                            {% if product.is_in_stock %}
+                                افزودن به سبد خرید
+                            {% else %}
+                                ناموجود
+                            {% endif %}
+                        </button>
+                    </form>
+                    <form method="POST"
+                          action="{% url 'apps.products:add_to_wishlist' product.id %}"
+                          class="inline-block">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-3 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:-translate-y-0.5 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                                aria-label="علاقه‌مندی">
+                            <i data-lucide="heart" class="size-4"></i>
+                        </button>
+                    </form>
+                    <button class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-3 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:-translate-y-0.5 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                            aria-label="مقایسه">
+                        <i data-lucide="git-compare" class="size-4"></i>
+                    </button>
+                    <button class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-3 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:-translate-y-0.5 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                            aria-label="اشتراک‌گذاری">
+                        <i data-lucide="share-2" class="size-4"></i>
+                    </button>
+                </div>
+
+                <!-- ویژگی‌های برجسته -->
+                <div class="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/50">
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                            <i data-lucide="truck" class="size-4 text-blue-600"></i>
+                            <span>ارسال سریع</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                            <i data-lucide="shield-check"
+                               class="size-4 text-emerald-600"></i>
+                            <span>گارانتی اصالت</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                            <i data-lucide="rotate-ccw"
+                               class="size-4 text-amber-600"></i>
+                            <span>بازگشت ۷ روزه</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                            <i data-lucide="credit-card"
+                               class="size-4 text-indigo-600"></i>
+                            <span>پرداخت امن</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ===== برگه‌ها ===== -->
+        <div class="mt-12" data-aos="fade-up">
+            <div x-data="{ tab: 'description' }"
+                 class="rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200/50 shadow-xl dark:bg-slate-900/80 dark:border-slate-800/50 overflow-hidden">
+
+                <!-- هدر برگه‌ها -->
+                <div class="flex overflow-x-auto border-b border-slate-200/50 dark:border-slate-700/50">
+                    <button @click="tab = 'description'"
+                            class="px-6 py-4 text-sm font-medium transition-all whitespace-nowrap"
+                            :class="tab === 'description' ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'">
+                        توضیحات
+                    </button>
+                    <button @click="tab = 'specifications'"
+                            class="px-6 py-4 text-sm font-medium transition-all whitespace-nowrap"
+                            :class="tab === 'specifications' ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'">
+                        مشخصات فنی
+                    </button>
+                    <button @click="tab = 'reviews'"
+                            class="px-6 py-4 text-sm font-medium transition-all whitespace-nowrap"
+                            :class="tab === 'reviews' ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'">
+                        نظرات ({{ reviews_count|default:0 }})
+                    </button>
+                </div>
+
+                <!-- محتوای برگه‌ها -->
+                <div class="p-6">
+                    <!-- توضیحات -->
+                    <div x-show="tab === 'description'" x-transition>
+                        <div class="prose prose-slate dark:prose-invert max-w-none">
+                            {{ product.description|linebreaks }}
+                        </div>
+                    </div>
+
+                    <!-- مشخصات فنی -->
+                    <div x-show="tab === 'specifications'" x-transition>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <tbody class="divide-y divide-slate-200/50 dark:divide-slate-700/50">
+                                {% for spec in specifications %}
+                                    <tr>
+                                        <td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">{{ spec.key }}</td>
+                                        <td class="px-4 py-3 text-slate-600 dark:text-slate-400">{{ spec.value }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="2"
+                                            class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
+                                            مشخصات فنی برای این محصول ثبت نشده است.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ===== نظرات (اصلاح شده) ===== -->
+                    <div x-show="tab === 'reviews'" x-transition>
+                        <!-- ===== پیام وضعیت نظر کاربر ===== -->
+                        {% if user.is_authenticated and user_review %}
+                            <div class="mb-4 rounded-xl {% if user_review.is_approved %}bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400{% else %}bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400{% endif %} p-4 text-sm">
+                                <i data-lucide="{% if user_review.is_approved %}check-circle{% else %}clock{% endif %}"
+                                   class="size-4 inline-block ml-1"></i>
+                                شما قبلاً برای این محصول نظر داده‌اید.
+                                {% if not user_review.is_approved %}
+                                    <span class="text-amber-600">(در انتظار تایید)</span>
+                                {% endif %}
+                            </div>
+                        {% elif user.is_authenticated %}
+                            <div class="mb-4 rounded-xl bg-blue-50 p-4 text-sm text-blue-600 dark:bg-blue-950/20 dark:text-blue-400">
+                                <i data-lucide="shopping-bag"
+                                   class="size-4 inline-block ml-1"></i>
+                                برای ثبت نظر باید این محصول را خریداری کرده باشید.
+                                <a href="{% url 'apps.products:product_list' %}"
+                                   class="font-medium underline hover:no-underline">
+                                    مشاهده محصولات
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="mb-4 rounded-xl bg-blue-50 p-4 text-sm text-blue-600 dark:bg-blue-950/20 dark:text-blue-400">
+                                <i data-lucide="log-in"
+                                   class="size-4 inline-block ml-1"></i>
+                                برای ثبت نظر ابتدا
+                                <a href="{% url 'apps.accounts:login' %}?next={{ request.path }}"
+                                   class="font-medium underline hover:no-underline">
+                                    وارد حساب خود شوید
+                                </a>.
+                            </div>
+                        {% endif %}
+
+                        <!-- ===== لیست نظرات تایید شده ===== -->
+                        {% if reviews %}
+                            <div class="space-y-4">
+                                {% for review in reviews %}
+                                    <div class="rounded-xl border border-slate-200/50 p-4 dark:border-slate-700/50">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <p class="font-medium text-slate-800 dark:text-white">{{ review.user.get_full_name|default:review.user.username }}</p>
+                                                <div class="flex items-center gap-2 mt-0.5">
+                                                    <div class="flex text-amber-400">
+                                                        {% for i in "12345"|make_list %}
+                                                            {% if forloop.counter <= review.rating %}
+                                                                <i data-lucide="star"
+                                                                   class="size-3.5 fill-amber-400"></i>
+                                                            {% else %}
+                                                                <i data-lucide="star"
+                                                                   class="size-3.5 text-slate-300 dark:text-slate-600"></i>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                    <span class="text-xs text-slate-500 dark:text-slate-400">{{ review.created_at|date:"Y/m/d" }}</span>
+                                                    {% if review.order %}
+                                                        <span class="text-[10px] text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full dark:bg-emerald-950/30">
+                                                        خرید تایید شده
+                                                    </span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">{{ review.comment }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-8">
+                                <i data-lucide="message-square"
+                                   class="size-12 text-slate-300 dark:text-slate-600 mx-auto"></i>
+                                <p class="mt-2 text-slate-500 dark:text-slate-400">هنوز
+                                    نظری برای این محصول ثبت نشده است.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== محصولات مرتبط ===== -->
+        {% if related_products %}
+            <div class="mt-12" data-aos="fade-up" data-aos-delay="100">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-white">محصولات
+                        مرتبط</h2>
+                    <a href="{% url 'apps.products:product_list' %}"
+                       class="text-sm text-blue-600 hover:underline dark:text-blue-400">مشاهده
+                        همه</a>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+                    {% for item in related_products|slice:":4" %}
+                        <div class="group rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-4 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                            <div class="relative">
+                                <div class="aspect-square rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                    {% if item.image %}
+                                        <img src="{{ item.image.url }}"
+                                             alt="{{ item.name }}"
+                                             class="size-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                    {% else %}
+                                        <div class="size-full flex items-center justify-center text-slate-400">
+                                            <i data-lucide="image" class="size-8"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                {% if item.discount_price %}
+                                    <div class="absolute top-2 right-2 rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                                        {{ item.get_discount_percent|default:"-??" }}%
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mt-3 space-y-1.5">
+                                <a href="{% url 'apps.products:product_detail' item.id %}">
+                                    <h4 class="text-sm font-semibold text-slate-800 dark:text-white line-clamp-1 hover:text-blue-600 transition-colors">{{ item.name }}</h4>
+                                </a>
+                                <div class="flex items-center gap-2">
+                                    {% if item.discount_price %}
+                                        <span class="text-xs text-slate-400 line-through">{{ item.price|floatformat:0 }}</span>
+                                        <span class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ item.discount_price|floatformat:0 }}</span>
+                                    {% else %}
+                                        <span class="text-sm font-bold text-slate-800 dark:text-white">{{ item.price|floatformat:0 }}</span>
+                                    {% endif %}
+                                    <span class="text-[10px] text-slate-400">تومان</span>
+                                </div>
+                                <button class="flex w-full items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-blue-700">
+                                    <i data-lucide="shopping-cart" class="size-3.5"></i>
+                                    خرید
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- ===== محصولات اخیراً مشاهده شده ===== -->
+        {% if recent_products %}
+            <div class="mt-12" data-aos="fade-up" data-aos-delay="150">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-white">اخیراً
+                        مشاهده شده</h2>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {% for item in recent_products|slice:":5" %}
+                        <div class="group rounded-2xl bg-white/80 backdrop-blur-xl border border-slate-200/50 p-3 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/80 dark:border-slate-800/50">
+                            <div class="relative">
+                                <div class="aspect-square rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                    {% if item.image %}
+                                        <img src="{{ item.image.url }}"
+                                             alt="{{ item.name }}"
+                                             class="size-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                    {% else %}
+                                        <div class="size-full flex items-center justify-center text-slate-400">
+                                            <i data-lucide="image" class="size-6"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="mt-2 space-y-1">
+                                <a href="{% url 'apps.products:product_detail' item.id %}">
+                                    <h4 class="text-xs font-medium text-slate-800 dark:text-white line-clamp-1 hover:text-blue-600 transition-colors">{{ item.name }}</h4>
+                                </a>
+                                <div class="flex items-center gap-1">
+                                    <span class="text-xs font-bold text-slate-800 dark:text-white">{{ item.price|floatformat:0 }}</span>
+                                    <span class="text-[8px] text-slate-400">تومان</span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+{% endblock %}

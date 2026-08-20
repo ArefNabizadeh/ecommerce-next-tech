@@ -1,0 +1,124 @@
+<!-- templates/base.html -->
+{% load static %}
+<!DOCTYPE html>
+<html
+    lang="fa"
+    dir="rtl"
+    class="scroll-smooth"
+>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}فروشگاه اینترنتی نکست‌تک{% endblock %}">
+    <title>{% block title %}نکست‌تک | فروشگاه دیجیتال{% endblock %}</title>
+
+    <!-- جلوگیری از فلش تم اشتباه هنگام لود صفحه (باید قبل از CSS اجرا بشه) -->
+    <script>
+        (function () {
+            const saved = localStorage.getItem('theme');
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const isDark = saved === 'dark' || (!saved && systemDark);
+            if (isDark) document.documentElement.classList.add('dark');
+        })();
+    </script>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <!-- AOS CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+
+    <!-- ===== کرسر سفارشی ===== -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-ring"></div>
+    <div class="scroll-progress"></div>
+
+    <!-- ===== نوار ناوبری ===== -->
+    {% include 'partials/navbar.html' %}
+
+    <!-- ===== محتوای اصلی ===== -->
+    <main class="min-h-screen transition-colors duration-300">
+        {% block content %}{% endblock %}
+    </main>
+    {% include 'partials/messages.html' %}
+    <!-- ===== فوتر ===== -->
+    {% include 'partials/footer.html' %}
+
+    <!-- ===== دکمه شناور تغییر تم ===== -->
+    {% include 'partials/theme-toggle.html' %}
+
+    <!-- ===== اسکریپت‌ها ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+
+    <script>
+        // Lucide Icons
+        lucide.createIcons();
+
+        // AOS
+        AOS.init({
+            once: true,
+            duration: 700,
+            offset: 60,
+            easing: "ease-out-cubic"
+        });
+
+        /*
+         * چرا Alpine.store به‌جای x-data روی <html>؟
+         * ---------------------------------------------
+         * darkMode قبلاً روی x-data="app()" بود و کامپوننت‌های تودرتو
+         * (مثل مگامنو و منوی پروفایل تو navbar) با $parent.darkMode
+         * بهش دسترسی پیدا می‌کردن. مشکل اینجاست که $parent فقط یک
+         * لایه بالا میره، نه تا ریشه. پس هر کامپوننتی که دو لایه یا
+         * بیشتر تو‌درتو باشه، دیگه بهش دسترسی نداره.
+         *
+         * Alpine.store سراسریه: از هر جای صفحه، با هر عمق تو‌درتویی،
+         * با $store.theme.dark قابل دسترسیه. این مشکل رو کامل حل می‌کنه.
+         */
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('theme', {
+                dark: document.documentElement.classList.contains('dark'),
+
+                toggle() {
+                    this.dark = !this.dark;
+                    document.documentElement.classList.toggle('dark', this.dark);
+                    localStorage.setItem('theme', this.dark ? 'dark' : 'light');
+                    // توجه: اینجا عمداً lucide.createIcons() دوباره صدا زده نمی‌شه.
+                    // این تابع هر <i data-lucide> رو با یه <svg> کاملاً جدید عوض می‌کنه؛
+                    // اگه دوباره صداش بزنیم، آیکون ماه/خورشید که با x-show توسط
+                    // Alpine کنترل می‌شن، جایگزین می‌شن و Alpine دیگه نمی‌تونه
+                    // نمایش/عدم‌نمایششون رو کنترل کنه (نتیجه: هر دو همیشه نشون داده می‌شن).
+                    // lucide فقط یک‌بار در لود اولیه‌ی صفحه لازمه صدا زده بشه.
+                }
+            });
+
+            // گوش دادن به تغییرات تم سیستم (فقط وقتی کاربر خودش تم رو ست نکرده)
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                if (!localStorage.getItem('theme')) {
+                    Alpine.store('theme').dark = e.matches;
+                    document.documentElement.classList.toggle('dark', e.matches);
+                }
+            });
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

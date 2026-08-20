@@ -1,0 +1,111 @@
+/* ========================================
+   CUSTOM CURSOR - NEXT TECH BRAND
+   ======================================== */
+
+/* ===== مخفی کردن کرسر پیش‌فرض مرورگر ===== */
+* {
+    cursor: none !important;
+}
+
+/* ===== کرسر سفارشی ===== */
+@media (min-width: 1024px) {
+    .cursor-dot {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #2563EB;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: opacity 0.2s ease, transform 0.05s linear;
+        mix-blend-mode: difference;
+        will-change: transform;
+    }
+
+    .cursor-ring {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1.5px solid rgba(37, 99, 235, 0.6);
+        pointer-events: none;
+        z-index: 9998;
+        transform: translate(-50%, -50%);
+        transition: width 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    height 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    border-color 0.3s ease,
+                    background 0.3s ease,
+                    transform 0.15s ease;
+        will-change: transform, width, height;
+    }
+
+    /* ===== حالت هاور روی لینک‌ها و دکمه‌ها ===== */
+    .cursor-ring.hover {
+        width: 56px;
+        height: 56px;
+        border-color: rgba(37, 99, 235, 0.9);
+        background: rgba(37, 99, 235, 0.08);
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    /* ===== حالت کلیک ===== */
+    .cursor-ring.click {
+        width: 24px;
+        height: 24px;
+        border-color: #2563EB;
+        background: rgba(37, 99, 235, 0.25);
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+
+    /* ===== حالت متن (برای انتخاب متن) ===== */
+    .cursor-ring.text {
+        width: 4px;
+        height: 28px;
+        border-color: #2563EB;
+        background: rgba(37, 99, 235, 0.3);
+        border-radius: 2px;
+        transform: translate(-50%, -50%) rotate(90deg);
+    }
+
+    .cursor-dot.hidden,
+    .cursor-ring.hidden {
+        opacity: 0;
+    }
+}
+
+/* ===== در موبایل و تبلت کرسر پیش‌فرض برگردد ===== */
+@media (max-width: 1023px) {
+    * {
+        cursor: auto !important;
+    }
+    .cursor-dot,
+    .cursor-ring {
+        display: none !important;
+    }
+}
+
+/* ========================================
+   SCROLL PROGRESS BAR
+   ======================================== */
+
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: #2563EB;
+    z-index: 9997;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 16px rgba(37, 99, 235, 0.25);
+}
+
+[dir="rtl"] .scroll-progress {
+    left: auto;
+    right: 0;
+}
