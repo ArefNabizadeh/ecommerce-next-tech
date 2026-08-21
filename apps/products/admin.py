@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from .models import (
     Brand, Category, Product, ProductImage,
-    ProductSpecification, Review, Wishlist
+    ProductSpecification, Review, Wishlist,FlashSale
 )
 
 
@@ -193,3 +193,19 @@ class WishlistAdmin(admin.ModelAdmin):
     list_display = ['user', 'product', 'created_at']
     search_fields = ['user__username', 'product__name']
     list_filter = ['created_at']
+
+
+@admin.register(FlashSale)
+class FlashSaleAdmin(admin.ModelAdmin):
+    """ادمین فروش ویژه"""
+    list_display = ['title', 'is_active', 'hours', 'minutes', 'seconds', 'created_at']
+    list_filter = ['is_active']
+    search_fields = ['title']
+    fieldsets = (
+        ('اطلاعات اصلی', {
+            'fields': ('title', 'is_active')
+        }),
+        ('تنظیمات تایمر', {
+            'fields': ('hours', 'minutes', 'seconds')
+        }),
+    )

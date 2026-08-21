@@ -350,19 +350,7 @@
                                             <!-- PRODUCT IMAGE -->
                                             <!-- ===================== -->
 
-                                            {% if product.image %}
 
-                                                <div
-                                                        class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
-                                                >
-                                                    <img
-                                                            src="{{ product.image.url }}"
-                                                            alt="{{ product.name }}"
-                                                            class="w-52 h-52 md:w-72 md:h-72 object-contain drop-shadow-2xl opacity-95"
-                                                    />
-                                                </div>
-
-                                            {% endif %}
 
                                             <!-- ===================== -->
                                             <!-- PRODUCT CONTENT -->
@@ -995,7 +983,7 @@
                 >
                 <span
                         class="font-mono text-lg font-bold text-blue-600 dark:text-blue-400"
-                        x-text="String(hours).padStart(2, '0')"
+                        x-text="String(seconds).padStart(2, '0')"
                 ></span>
                     <span class="text-slate-400">:</span>
                     <span
@@ -1005,7 +993,7 @@
                     <span class="text-slate-400">:</span>
                     <span
                             class="font-mono text-lg font-bold text-blue-600 dark:text-blue-400"
-                            x-text="String(seconds).padStart(2, '0')"
+                            x-text="String(hours).padStart(2, '0')"
                     ></span>
                 </div>
             </div>
