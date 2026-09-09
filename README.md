@@ -9,7 +9,19 @@ A modern, Persian-first electronics e-commerce web application built with **Djan
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC?logo=tailwindcss)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey)](#license)
 
+**[🔗 Live Demo](https://next-tech-green.vercel.app)**
+
 </div>
+
+---
+
+## 📸 Screenshots
+
+<!--
+راهنمای جایگذاری عکس در پایین توضیح داده شده — همین‌جا با همین سینتکس جایگزینش کن:
+-->
+
+![Home page](https://github.com/user-attachments/assets/4fa644e2-12a0-43af-8d7c-b0ff7181e359)
 
 ---
 
